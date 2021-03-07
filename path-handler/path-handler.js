@@ -168,11 +168,16 @@ function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
     return pc
 }
 
-
-module.exports = Path_handler_factory;
+// // //
+module.exports = Path_handler_factory;  // most applications will be OK with this factory. 
 //
+// // More detail is attached to the function export for classes wanting to override classes or use symbols.
+// // // SYMBOLS
 module.exports.USER_PATH = USER_PATH
 module.exports.PERSISTENCE_PATH = PERSISTENCE_PATH
 module.exports.EMAIL_PATH = EMAIL_PATH
 module.exports.CONTACT_PATH = CONTACT_PATH
 module.exports.NOTIFICATION_PATH = NOTIFICATION_PATH
+// // // CLASSES
+module.exports.classes = g_path_classes     // applications may want to override the class implementations given here.
+module.exports.base_class = PathHandler
