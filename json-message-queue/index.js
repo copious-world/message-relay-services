@@ -1,14 +1,41 @@
 
-
 class JSONMessageQueue {
 
-    constructor() {
+    constructor(decoder) {
         this.message_queue = []
         this.last_message = ''
         this.message_paths = []
         this.messenger_connections = {}
         this.subscriptions = {}
+        this.current_message = {}
+        this.message_decoder = decoder
+        if ( decoder === false ) {
+            this.message_decoder = this.default_decoder
+        }
     }
+    
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    set_decoder(decoder) {
+        this.message_decoder = decoder
+    }
+
+    default_decoder(str) {
+        try {
+            let m_obj = JSON.parse(str)
+            return m_obj
+        } catch (e) {
+            console.log(e)
+        }
+        return false
+    }
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    //
+    add_data(data) {
+        this.last_message += data.toString()
+    }
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    //
     message_complete() {
         let msg = this.last_message
         msg = msg.trim()
@@ -24,11 +51,10 @@ class JSONMessageQueue {
             let str = rest
             if ( i < (n-1) ) str += '}'
             if ( i > 0 ) str = '{' + str
-            try {
-                let m_obj = JSON.parse(str)
+            let m_obj = this.message_decoder(str)
+            if ( m_obj ) {
                 this.message_queue.push(m_obj)              /// enqueue
-            } catch (e) {
-                console.log(e)
+            } else {
                 mescon.last_message = rest
             }
         }
@@ -38,6 +64,7 @@ class JSONMessageQueue {
     //
     dequeue() {
         this.current_message = this.message_queue.shift()
+        return this.current_message
     }
 
 }
