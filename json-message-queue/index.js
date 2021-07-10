@@ -67,6 +67,20 @@ class JSONMessageQueue {
         return this.current_message
     }
 
+
+    encode_message(message) {
+        return JSON.stringify(message)
+    }
+
+    decode_message(message_str) {
+        try {
+            let message = JSON.parse(message_str)
+            return message
+        } catch (e) {
+            return false
+        }
+    }
+
 }
 
 

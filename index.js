@@ -1,6 +1,7 @@
 const ClientMessageRelay = require('./lib/message_relay_client.js')
 const ServerMessageRelay = require('./lib/message_relay.js')
 const ServerMessageEndpoint = require('./lib/message_endpoint.js')
+const MultiRelayClient = require('./lib/mutli_relay_client')
 //
 const PathHandler = requie('./path-handler/path-handler')
 //
@@ -11,3 +12,4 @@ module.exports.ServeMessageRelay = ServerMessageRelay
 module.exports.ServeMessageEndpoint = ServerMessageEndpoint
 //
 module.exports.PathHandler = PathHandler
+module.exports.MultiRelayClient = MultiRelayClient

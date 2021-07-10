@@ -57,9 +57,15 @@ class PathHandler extends EventEmitter {
 
     subscribe(topic,msg,handler) {
         msg.topic = topic     // just a double check on making sure that required fields are present
-        msg.ps_op = 'sub'
-        this.message_relayer.on('update',handler)       // add another event listener
+        msg._ps_op = 'sub'
+        this.message_relayer.subscribe(topic,msg,handler)       // add another event listener
         this.send(msg)
+    }
+
+    unsubscribe(topic,msg) {
+        msg.topic = topic 
+        msg._ps_op = 'unsub'
+        this.message_relayer.unsubscribe(topic,msg)
     }
 
     request_cleanup(handler) {
