@@ -12,7 +12,7 @@ The application should override these classes and create instance methods.
 
 In this group of modules, MultiRelayClient is deemed a luxury class. It is a wrapper around a collection of MessageRelayer objects. It allows a rough form of load balancing for those applications using more than one peer processor.
 
-###Purpose
+### Purpose
 
 These classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well.
 
@@ -24,18 +24,18 @@ Some of the meta data may refer to IDs of data which provide access to larger da
 
 Those looking for a much larger suite of capabilities should look elsewhere.
 
-####Servers
+#### Servers
 
 *  **ServeMessageRelay**
 *  **ServeMessageEndpoint**
 
-####Clients
+#### Clients
 
 * **MessageRelayer**
 * **PathHandler** (from within ServeMessageRelay through MessageRelayer)
 * **MultiRelayClient**
 
-####Messages
+#### Messages
 
 All messages are **JSON** objects. The JSON objects will have the structure required by the endpoint that consumes them. For the sake of passing the JSON objects through the servers, some particular field will be required. Application code must put in one or two fields with specific values. Some of the class methods will help in adding these fields.
 
@@ -47,21 +47,21 @@ All messages are **JSON** objects. The JSON objects will have the structure requ
 
 These are the only fields reserved by this package.
 
-###Install
+### Install
 ```
 npm install message-relay-service
 ```
 
-###Pathways
+### Pathways
 
 A **pathway**, as far as this package is concerned, is a *tagged* pathway from a client to an endpoint though servers. A **tag** is attached to a message 
 
-###Configuration
+### Configuration
 
 Please refer to the configuration sections within each class description.
 
 
-##Classes
+## Classes
 
 Two of the classes provide server functions. Two provde client functions. One class provides multiple clients.
 
@@ -70,7 +70,7 @@ While these classes are very common among networking projects, they provide a fa
 So, the pub/sub mechanism is based on local JavaScript maps. They also have fairly well planned and configured endpoints. 
 
 
-###1. **MessageRelayer**
+### 1. **MessageRelayer**
 
 MessageRelayer is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
 
