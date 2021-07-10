@@ -52,10 +52,10 @@ class JSONMessageQueue {
             if ( m_obj ) {
                 this.message_queue.push(m_obj)              /// enqueue
             } else {
-                mescon.last_message = rest
+                this.last_message = rest
             }
         }
-        mescon.last_message = ""
+        this.last_message = ""
     }
 
     //
