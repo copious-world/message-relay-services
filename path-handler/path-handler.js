@@ -36,21 +36,19 @@ class PathHandler extends EventEmitter {
     }
 
     async send(message) {       // no _tx_op thereby handling 'P', 'S', and others such as 'U'... which write for particular purposes
-        let response = await this.message_relayer.sendMessage(message)
+        let response = await this.message_relayer.send_on_path(message,this.path)
         return response
     }
 
     async get(message) {
         let op_message = Object.assign({},message)
-        if ( op_message._tx_op !== 'G' ) op_message._tx_op = 'G'
-        let response = await this.message_relayer.sendMessage(op_message)
+        let response = await this.message_relayer.send_op_on_path(op_message,this.path,'G')
         return response
     }
 
     async del(message) {
         let op_message = Object.assign({},message)
-        if ( op_message._tx_op !== 'D' ) op_message._tx_op = 'D'
-        let response = await this.message_relayer.sendMessage(op_message)
+        let response = await this.message_relayer.send_op_on_path(op_message,this.path,'D')
         return response
     }
 
@@ -58,14 +56,14 @@ class PathHandler extends EventEmitter {
     subscribe(topic,msg,handler) {
         msg.topic = topic     // just a double check on making sure that required fields are present
         msg._ps_op = 'sub'
-        this.message_relayer.subscribe(topic,msg,handler)       // add another event listener
+        this.message_relayer.subscribe(topic,this.path,msg,handler)       // add another event listener
         this.send(msg)
     }
 
     unsubscribe(topic,msg) {
         msg.topic = topic 
         msg._ps_op = 'unsub'
-        this.message_relayer.unsubscribe(topic,msg)
+        this.message_relayer.unsubscribe(topic,this.path)
     }
 
     request_cleanup(handler) {
