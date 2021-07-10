@@ -4,9 +4,6 @@ class JSONMessageQueue {
     constructor(decoder) {
         this.message_queue = []
         this.last_message = ''
-        this.message_paths = []
-        this.messenger_connections = {}
-        this.subscriptions = {}
         this.current_message = {}
         this.message_decoder = decoder
         if ( decoder === false ) {

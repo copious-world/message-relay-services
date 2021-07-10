@@ -83,11 +83,11 @@ So, the pub/sub mechanism is based on local JavaScript maps. They also have fair
 
 MessageRelayer is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
 
-The MessageRelayer class may be configured to send messages over its transport ((TCP or TLS) connected to one peer. Or, it may be configured to write messages to files. There is also an option to write messages to files when the network connection fails, and another option to send the messages from the file after the connection is reestablished.
+The *MessageRelayer* class may be configured to send messages over its transport (TCP or TLS) connected to one peer. Or, it may be configured to write messages to files. There is also an option to write messages to files when the network connection fails, and another option to send the messages from the file after the connection is reestablished.
 
 Several types of file activity are possible. The *MessageRelayer* instance may write to files while a connection is broken, or it may only ever write to files. If it writes to files, it may write each message to its own file or it may write messages to a single file in a stream. (Files are written to a local directory.) There is also an option to send the messages from the backup file after the connection is reestablished
 
-The *MessageRelayer* **\_response\_id** is generated from a list of free id's stored within the *MessageRelayer* instance. Configurations may include ***max_pending_messages*** to set an upper limit on the number of messages waiting for response. If this configuration field is not supplied, the default is 100.
+The *MessageRelayer* **\_response\_id** is generated from a list of free id's stored within the *MessageRelayer* instance. Configurations may include ***max\_pending\_messages*** to set an upper limit on the number of messages waiting for response. If this configuration field is not supplied, the default is 100.
 
 
 #### *Methods*
@@ -144,15 +144,20 @@ The *MessageRelayer* **\_response\_id** is generated from a list of free id's st
 
 ### 2. **ServeMessageRelay**
 
-A ServeMessageRelay instance creates a server (TCP or TLS) when it is constructed. 
+A *ServeMessageRelay* instance creates a server (TCP or TLS) when it is constructed. 
 
 An applicatons calls ```let server = new ServeMessageRelay(conf)```. The class first initializes itself from the configuration. Then server starts running at this point. 
 
-The server expects JSON object to be delivered to it by MessageRelayer peers.
+The server expects JSON object to be delivered to it by *MessageRelayer* peers.
 
-The server finds the path handler, PathHandler instance, identified by the \_m\_path field of the message. It then looks at the \_tx\_op and calls the appropriate method of the path handler. If there is no \_tx\_op and no \_ps\_op, the default is to forward the message through the PathHandler instance. If the path has a \_ps\_op, the pub/sub operations of the PathHanlders instance are invoked.
+For each message coming in on a *MessageRelayer* connection, the server finds the path handler, *PathHandler* instance, identified by the \_m\_path field of the message. It then looks at the \_tx\_op and calls the appropriate method of the *PathHandler* instance. If there is no \_tx\_op and no \_ps\_op, the default is to forward the message through the *PathHandler* instance. If the path has a \_ps\_op, the pub/sub operations of the *PathHandler* instance are invoked.
 
-#### ServeMessageRelay Example
+##### Fan in and Fan out
+> The clients of the relay, instances of *MessageRelayer*, send messages in a **fan-in** pattern to the the *ServeMessageRelay* instance. The *PathHandler* instances configured for and made by the *ServeMessageRelay* instance send messages along the pathways for which each path type has a client. So, the connections are potentially many to a few configured endpoint client connections.
+> 
+> **numerical example**:  So, if a 100 clients send messages along 4 pathways, the *ServeMessageRelay* instance is configured to use 4 connections created by the 4 *PathHandler* instances.
+
+#### ServeMessageRelay Configuration Example
 
 This is a relay server that has several path types that can be found in the types from the default PathHandler object. In this example, path types are specified in the configuration and they just happen to be the default path types. Also, there is a field **path\_handler\_factory** which names the class of the PathHandler. It may be best for your application to use the file "path-handler.js" in the directory "path_handler" as a template.
 
