@@ -16,13 +16,13 @@ In this group of modules, MultiRelayClient is deemed a luxury class. It is a wra
 
 These classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well.
 
-The network architeture that these classes are meant for is one that is fairly well fixed. For example, these may work well for applications in a cluster. So, preconfiguration of IP addresses is assumed.
+The network architecture that these classes are meant for is one that is fairly well fixed. For example, these may work well for applications in a cluster. So, preconfiguration of IP addresses is assumed.
 
-The main use of these classes has been for transfering meta data (data about data) from a web dashboards and desktop applications to services that provide information for small servers such as blogs. One current application writes JSON object to directories on a machine that hosts blog servers. These directories may become RAM Disk at some point.
+The main use of these classes has been for transfering meta data (data about data) from a web dashboards and desktop applications to services that provide information for small servers such as blogs. One current application writes JSON objects to directories on a machine that hosts blog servers. In such applications, some of the meta data may refer to IDs of data which can be used to attain access to larger data objects outside the realm of the cluster. 
 
-Some of the meta data may refer to IDs of data which provide access to larger data outside the realm of the cluster. These classes dont' examine the meta data objects. They just pass messages.
+However, these classes, here in message-relay-services, don't examine meta data objects. They just pass messages. Some might refer to meta data carried in messages to be the "payload" of the message. But, we can say that ***these classes add particular fields to JSON messages to aid in their transport***.
 
-Those looking for a much larger suite of capabilities should look elsewhere.
+As far as networking and message queue subsystens go, those looking for a much larger suite of capabilities should look elsewhere. The idea here is that these classes supply sufficient communication for bootstrapping a small cluster based website. The may be a simple enough a framework for language transpilation a well.
 
 #### Servers
 
@@ -37,15 +37,15 @@ Those looking for a much larger suite of capabilities should look elsewhere.
 
 #### Messages
 
-All messages are **JSON** objects. The JSON objects will have the structure required by the endpoint that consumes them. For the sake of passing the JSON objects through the servers, some particular field will be required. Application code must put in one or two fields with specific values. Some of the class methods will help in adding these fields.
+With respect to the classes provided here, all messages are **JSON** objects. The JSON objects will have the structure required by the endpoint that consumes them. For the sake of passing the JSON objects through the servers, some particular field will be required. Application code must put in one or two fields with specific values. Some of the class methods will help in adding these fields.
 
-* **\_m\_path** identifies the path for the message. The path tag can be defined by the application. 
+* **\_m\_path** identifies the path for the message. The set of path tags can be defined by the application. 
 * **\_tx\_op** identifies an operation that specifies a limited set of operations identified by a single character. Among these are 'S','G','D' for Set, Get, and Delete
 * **\_ps\_op** identifies a **pub/sub** operation.
 * **topic** identifies a **pub/sub** topic.
 * **\_response\_id** is a field that the MessageRelayer adds to a message object in order to identify responses with message that were sent. Applications should not add this field to the top layer of their application messages.
 
-These are the only fields reserved by this package.
+These are the only fields reserved by this package. (Note that *topic* is the only field without the underscore.)
 
 ### Install
 ```
@@ -54,7 +54,16 @@ npm install message-relay-service
 
 ### Pathways
 
-A **pathway**, as far as this package is concerned, is a *tagged* pathway from a client to an endpoint though servers. A **tag** is attached to a message 
+A **pathway**, as far as this package is concerned, is a *tagged* pathway from a client to an endpoint though servers. A **tag** is attached to a message.  (The message object field for this is **\_m\_path**.)
+
+The *ServeMessageRelay* instances use the path to hand of messages to downstream servers which might be specialized for handling messages on the paths. Usually, instances of *ServeMessageEndpoint* will provide custom code for handling messages at the end of a path.
+
+The set of path tags can be defined by the application. *ServeMessageRelay* takes a configuration object. In the configuration object, there are two fields that may be used to define paths through the *ServeMessageRelay*  instance.
+
+* **path_types** : [ \<a list of path tags as strings\> ]
+* **path_handler_factory** : \<the name of a module containing a PathHandler implementation\>
+
+It's up to the application to make the *PathHandler* objects as simple or complex as they want. Perhaps path switching can be done. And, there is nothing stopping an application from chaining instances of *ServeMessageRelay*.
 
 ### Configuration
 
@@ -74,11 +83,11 @@ So, the pub/sub mechanism is based on local JavaScript maps. They also have fair
 
 MessageRelayer is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
 
-The MessageRelayer class may be configured to send messages over its transport (TCP/TLS) connected to one peer. Or, it may be configured to write messages to files. There is also an option to write messages to files when the network connection fails, and another option to send the messages from the file after the connection is reestablished.
+The MessageRelayer class may be configured to send messages over its transport ((TCP or TLS) connected to one peer. Or, it may be configured to write messages to files. There is also an option to write messages to files when the network connection fails, and another option to send the messages from the file after the connection is reestablished.
 
-Several types of file activity are possible. The MessageRelayer instance may write to files while a connection is broken, or it may only ever write to files. If it writes to files, it may write each message to its own file or it may write messages to a single file in a stream. (Files are written to a local directory.) There is also an option to send the messages from the backup file after the connection is reestablished
+Several types of file activity are possible. The *MessageRelayer* instance may write to files while a connection is broken, or it may only ever write to files. If it writes to files, it may write each message to its own file or it may write messages to a single file in a stream. (Files are written to a local directory.) There is also an option to send the messages from the backup file after the connection is reestablished
 
-The MessageRelayer **\_response\_id** is generated from a list of free id's  stored within the MessageRelayer instance class. Configurations may include ***max_pending_messages*** to set an upper limit on the number of messages waiting for response. If this configuration field is not supplied, the default is 100.
+The *MessageRelayer* **\_response\_id** is generated from a list of free id's stored within the *MessageRelayer* instance. Configurations may include ***max_pending_messages*** to set an upper limit on the number of messages waiting for response. If this configuration field is not supplied, the default is 100.
 
 
 #### *Methods*
@@ -217,13 +226,13 @@ Notice that each path handler configuraion has a *relay* field containing config
 
 ### 3. **ServeMessageEndpoint**
 
-An endpoint server may often have the purpose of storing meta data about larger objects such as blog entries, media that may be streamed, images, etc. An endpoint application may store store tables listing the meta data files owned by a particular user or entity as part of the bookkeeping associated with storing meta data. In one application, the meta data contains IPFS CIDs which blog services present as links to be retreived by streaming services.
+An endpoint server may often have the purpose of storing meta data about larger objects such as blog entries, media that may be streamed, images, etc. An endpoint application may store tables listing the meta data files owned by a particular user or entity as part of the bookkeeping associated with storing meta data. In one application, the meta data contains IPFS CIDs which blog services present as links to be retreived by streaming services.
 
-This class always sends a response back to it conneting peer. 
+This class always sends a response back to it connecting peer. 
 
 You may find this class's implementation in ./lib/message_endpoints.js.
 
-When the ServeMesageEndpoint object dequeues a message, it looks for the field **\_ps\_op**. If the field is not found, the message is passed to the descendant application class. Otherwise, the pub/sub messages are handled. 
+When the *ServeMesageEndpoint* object dequeues a message, it looks for the field **\_ps\_op**. If the field is not found, the message is passed to the descendant application class. Otherwise, the pub/sub messages are handled. 
 
 #### *Methods*
 This class provides three methods that should be implemented by descendant classes:
@@ -240,7 +249,7 @@ This class provides three methods that should be implemented by descendant class
 
 #### EndPoints Configuration Example
 
-Each field top level field in the next object configures one of two endpoints. The ports are for servers.  These configurations are from applications. So, these are the directory structures of applications.
+Each top level field in the object below configures one of two endpoints. The ports are for servers. These configurations are from applications. So, these are the directory structures of applications.
 
 ```
 {
@@ -279,11 +288,11 @@ Each field top level field in the next object configures one of two endpoints. T
 
 ### 4. **PathHandler**
 
-Pathways are required for passing messages through ServeMessageRelay. Configuring the pathways helps in organizing an application around services that have been intentionally placed on machines within a cluster. If an applcation does not use ServeMessageRelay and just connects MessageRelayer instances to endpoints, then there will be no use for a PathHandler instance.
+Pathways are required for passing messages through *ServeMessageRelay*. Configuring the pathways helps in organizing an application around services that have been intentionally placed on machines within a cluster. If an application does not use *ServeMessageRelay* and just connects *MessageRelayer* instances to endpoints, *ServeMessageEndpoint* instances, then there will be no use for a PathHandler instance.
 
-An example, defautl, implementation for a PathHandler class can be found in /path-handler/path-handler.js.
+An example, default, implementation for a *PathHandler* class can be found in /path-handler/path-handler.js.
 
-The ServeMessageRelay makes use of the following methods when calling a PathHandler instance:
+The *ServeMessageRelay* makes use of the following methods when calling a *PathHandler* instance:
 
 #### *Methods*
 * **async send(message)**
@@ -304,11 +313,11 @@ The ServeMessageRelay makes use of the following methods when calling a PathHand
 
 ### 5. **MultiRelayClient**
 
-This class wraps around a list of RelayClient and exposes methods of the same name as those in RelayClient. The only difference is, a MultiRelayClient instance will pick a peer connection according to a schedule to send the message to. It is assumed that the endpoints at the ends of the relay are perform the same or similar and mutually beneficial services as their counterparts.
+This class wraps around a list of *RelayClient* and exposes methods of the same name as those in *RelayClient*. The only difference is, a *MultiRelayClient* instance will pick a peer connection according to a schedule to send the message to. It is assumed that the endpoints at the ends of the relay are perform the same or similar and mutually beneficial services as their counterparts.
 
 #### MultiRelayClient Configuration Example
 
-The MultiRelayClient configures each instance of a MessageRelayer the same. Furthermore, it makes no distinction about where messages go by their type. It just picks a peer according to a configured schedule, balance strategy, and sends the message. It attempts to fail over to choosing a live peer connection when other peers fail. If all the peers fail, messages may be shunted to files. Currently, balance_strategy can be "sequence" (like round robin) or "random". 
+The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. Furthermore, it makes no distinction about where messages go by their type. It just picks a peer according to a configured schedule, balance strategy, and sends the message. It attempts to fail over to choosing a live peer connection when other peers fail. If all the peers fail, messages may be shunted to files. Currently, balance_strategy can be **sequence** (like round robin) or **random**. 
 
 ```
 {
