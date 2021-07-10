@@ -352,3 +352,29 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 }
 ```
 
+## Helper Classes
+
+#### JSONMessageQueue
+> This class takes in the data buffers delivered by the data handlers listening on sockets. It parses the stream in to strings encoding objects. It converts the strings to JavaScript objects and enqueues them. It maintains a simple queue of objects and provides the *dequeue* method for classes that use it.
+
+Here its methods:
+
+* **add_data(data)**
+> appends string data to the stream
+
+* **message_complete()**
+> parses the stream, decodes the messages, and then enqueues it
+
+* **dequeue()**
+> Take the last message of the queue and returns it or false if the queue is empty
+
+* **set_decoder(decoder)**
+> allow the application to set its own decoder (working on text between braces, {})
+
+* **encode_message(message)**
+> available to the application to send encode a message that can be decoded by the decoder
+
+* **decode_message(message_str)**
+> call the decoder that has been set (default JSON.parse)
+
+
