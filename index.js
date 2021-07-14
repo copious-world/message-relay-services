@@ -3,7 +3,7 @@ const ServerMessageRelay = require('./lib/message_relay.js')
 const ServerMessageEndpoint = require('./lib/message_endpoint.js')
 const MultiRelayClient = require('./lib/mutli_relay_client')
 //
-const PathHandler = requie('./path-handler/path-handler')
+const PathHandler = require('./path-handler/path-handler')
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //

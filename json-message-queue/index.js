@@ -21,7 +21,7 @@ class JSONMessageQueue {
             let m_obj = JSON.parse(str)
             return m_obj
         } catch (e) {
-            console.log(e)
+            console.error(e)
         }
         return false
     }
@@ -35,9 +35,11 @@ class JSONMessageQueue {
     //
     message_complete() {
         let msg = this.last_message
+        this.last_message = ""
+        //
         msg = msg.trim()
-        //console.log(msg)
-        if ( !(msg.length) ) return ""
+        //
+        if ( !(msg.length) ) return
         //
         msg = msg.replace(/\}\s+\{/g,'}{')
         let raw_m_list = msg.split('}{')
@@ -52,10 +54,9 @@ class JSONMessageQueue {
             if ( m_obj ) {
                 this.message_queue.push(m_obj)              /// enqueue
             } else {
-                this.last_message = rest
+                this.last_message = '{' + rest
             }
         }
-        this.last_message = ""
     }
 
     //

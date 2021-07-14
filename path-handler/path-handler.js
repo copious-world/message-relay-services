@@ -184,4 +184,4 @@ module.exports.CONTACT_PATH = CONTACT_PATH
 module.exports.NOTIFICATION_PATH = NOTIFICATION_PATH
 // // // CLASSES
 module.exports.classes = g_path_classes     // applications may want to override the class implementations given here.
-module.exports.base_class = PathHandler
+module.exports.PathHandler = PathHandler
