@@ -52,18 +52,12 @@ class PathHandler extends EventEmitter {
         return response
     }
 
-
-    subscribe(topic,msg,handler) {
-        msg.topic = topic     // just a double check on making sure that required fields are present
-        msg._ps_op = 'sub'
-        this.message_relayer.subscribe(topic,this.path,msg,handler)       // add another event listener
-        this.send(msg)
+    async subscribe(topic,msg,handler) {
+        await this.message_relayer.subscribe(topic,this.path,msg,handler)       // add another event listener
     }
 
-    unsubscribe(topic,msg) {
-        msg.topic = topic 
-        msg._ps_op = 'unsub'
-        this.message_relayer.unsubscribe(topic,this.path)
+    async unsubscribe(topic) {
+        return await this.message_relayer.unsubscribe(topic,this.path)
     }
 
     request_cleanup(handler) {
@@ -126,7 +120,6 @@ class PersistenceHandler extends PathHandler {
         if ( conf.listeners ) {
             conf.listeners.forEach(listener => {
                 // most likely stick things in the local database
-                this.message_relayer.on('update_string',listener.strings)
                 this.message_relayer.on('update',listener.objects)
             })
         }
@@ -144,7 +137,6 @@ class NotificationHandler extends PathHandler {
         if ( conf.listeners ) {
             conf.listeners.forEach(listener => {
                 // most likely stick things in the local database
-                this.message_relayer.on('update_string',listener.strings)
                 this.message_relayer.on('update',listener.objects)
             })
         }
