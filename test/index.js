@@ -4,7 +4,12 @@ const test = require('ava');
 let JSONMessageQueue = require("../json-message-queue")
 let path_constuctor = require("../path-handler/path-handler")
 let PathHandler = path_constuctor.PathHandler
+//
+//
 
+let MessageEndpoint = require('../lib/message_endpoint')
+
+//
 // /*
 test('json message queue: create class', t => {
     let mod = new JSONMessageQueue(false)
@@ -262,3 +267,151 @@ test('PathHandler - create', async t => {
 })
 
 
+test("Message Endpoint - functional", async t => {
+
+    class TestClass extends MessageEndpoint {
+        constructor(conf) {
+            super(conf)
+        }
+
+        init() {
+            // do nothing... 
+        }
+
+        app_message_handler(msg_obj) {
+            return msg_obj
+        }
+
+        app_subscription_handler(topic,msg_obj) {
+            
+        }
+    }
+
+    let call_results = {}
+
+    class testSock {
+        constructor(name) {
+            this.readyState = "open"
+            this.test_name = name
+        }
+
+        write(msg) {
+            call_results[this.test_name] = JSON.parse(msg)
+        }
+
+        end() {}
+    }
+
+    let conf = {
+        "port" : 500,
+        "address" : "my address",
+        "app_handles_subscriptions" : true
+    }
+
+    let inert = new TestClass(conf)
+
+    let all_socks = []
+    for ( let i = 0; i < 10; i++ ) {
+        let client_name = `ACLIENT_${i}`
+        let sock = new testSock(client_name)
+        inert.add_connection(client_name,sock)
+        all_socks.push(sock)
+    }
+
+
+    for ( let i = 0; i < 10; i++ ) {
+        let msg = {
+            "name" : "SUB TEST",
+            "_response_id" : i
+        }
+        let client_name = `ACLIENT_${i}`
+        try {
+            let data = Buffer.from(JSON.stringify(msg))
+            await inert.add_data_and_react(client_name,data)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    for ( let i = 0; i < 10; i++ ) {
+        let client_name = `ACLIENT_${i}`
+        t.is(call_results[client_name]._response_id,i)
+    }
+
+
+    // _ps_op
+    for ( let i = 0; i < 10; i++ ) {
+        let msg = {
+            "name" : "SUB TEST",
+            "_ps_op" : "sub",
+            "_response_id" : i,
+            "topic" : "test"
+        }
+        let client_name = `ACLIENT_${i}`
+        try {
+            let data = Buffer.from(JSON.stringify(msg))
+            await inert.add_data_and_react(client_name,data)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    let t_set = inert.all_topics["test"]
+    t.is(typeof t_set,"object")
+    for ( let ty in t_set ) {
+        t.is(t_set[ty].constructor.name,"Replier")
+    }
+
+    let i = 5
+    let client_name = `ACLIENT_${i}`
+    let msg = {
+        "name" : "SUB TEST",
+        "_ps_op" : "pub",
+        "_response_id" : i,
+        "topic" : "test"
+    }
+    try {
+        let data = Buffer.from(JSON.stringify(msg))
+        await inert.add_data_and_react(client_name,data)
+    } catch (e) {
+        console.error(e)
+    }
+
+    for ( let i = 0; i < 10; i++ ) {
+        let client_name = `ACLIENT_${i}`
+        if ( i !== 5 ) {
+            t.is(call_results[client_name]._response_id,undefined)
+            t.is(call_results[client_name].name,"SUB TEST")
+            t.is(call_results[client_name].topic,"test")
+        } else {
+            t.is(call_results[client_name]._response_id,5)
+        }
+    }
+
+
+
+    let j = 5
+    let un_client_name = `ACLIENT_${j}`
+    let msg_un = {
+        "name" : "SUB TEST",
+        "_ps_op" : "unsub",
+        "_response_id" : j,
+        "topic" : "test"
+    }
+
+    try {
+        let data = Buffer.from(JSON.stringify(msg_un))
+        await inert.add_data_and_react(un_client_name,data)
+    } catch (e) {
+        console.error(e)
+    }
+
+
+    let un_t_set = inert.all_topics["test"]
+    t.is(typeof t_set,"object")
+    for ( let ty in un_t_set ) {
+        t.true(ty !== 'ACLIENT_5')
+    }
+
+    t.pass("end point without crash")
+})
