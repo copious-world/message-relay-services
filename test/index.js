@@ -8,9 +8,10 @@ let PathHandler = path_constuctor.PathHandler
 //
 
 let MessageEndpoint = require('../lib/message_endpoint')
+let MessageRelay = require('../lib/message_relay')
 
 //
-// /*
+
 test('json message queue: create class', t => {
     let mod = new JSONMessageQueue(false)
     if ( mod ) {
@@ -146,8 +147,10 @@ test('json message queue: dequeue message complete ', t => {
 
 // */
 
-class TestRelayClass {
+let T_test_message_lookup = {
+}
 
+class TestRelayClass {
 
     constructor(conf) {
         this.test_parameters = conf.test_parameters
@@ -156,12 +159,14 @@ class TestRelayClass {
 
     send_on_path(message,path) {
         message._m_path = path
+        T_test_message_lookup[message._test_lookup] = message
         return message
     }
 
     send_op_on_path(message,path,op) {
         message._m_path = path
         message._tx_op = op
+        T_test_message_lookup[message._test_lookup] = message
         return message
     }
 
@@ -189,6 +194,7 @@ class TestRelayClass {
     }
 }
 
+// /*
 test('PathHandler - create', async t => {
     //
     let pconf = {
@@ -266,7 +272,6 @@ test('PathHandler - create', async t => {
     t.pass("used path handler class")
 })
 
-
 test("Message Endpoint - functional", async t => {
 
     class TestClass extends MessageEndpoint {
@@ -283,7 +288,7 @@ test("Message Endpoint - functional", async t => {
         }
 
         app_subscription_handler(topic,msg_obj) {
-            
+
         }
     }
 
@@ -414,4 +419,147 @@ test("Message Endpoint - functional", async t => {
     }
 
     t.pass("end point without crash")
+})
+
+
+// */
+
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+test("message_relay service", async t => {
+    //
+    let call_results = {}
+
+    class testSock {
+        constructor(name) {
+            this.readyState = "open"
+            this.test_name = name
+            this.remoteAddress = "wiggly"
+            this.remotePort = "pigly"
+        }
+
+        write(msg) {
+            call_results[this.test_name] = JSON.parse(msg)
+        }
+
+        end() {}
+
+        
+    }
+
+    // ---- ---- ---- ---- ---- ---- ----
+    class test_Relay extends MessageRelay {
+
+        constructor(conf,fanoutRelayer) {
+            super(conf,fanoutRelayer)
+        }
+
+        init() {
+        }
+
+    }
+
+    let conf = {
+        "port" : "wine",
+        "address" : "101 home st",
+        "tls" : undefined,
+        "path_types" : {
+            "winding" : {
+                "relay" : {
+                    "files_only" : false,
+                    "output_dir" : "fail_over_user",
+                    "output_file" : "/user_data.json",
+                    "port" : 5114,
+                    "address" : "localhost",
+                    "max_pending_messages" : false,
+                    "file_shunting" : false,
+                    "max_reconnect" : 24,
+                    "reconnect_wait" : 5,
+                    "attempt_reconnect" : true
+                }
+            }
+        },
+        "path_handler_factory" : __dirname + "/helpers/faux_paths"
+    }
+
+    let sock = new testSock("wiggly-pigly")
+
+    let class_obj = new test_Relay(conf,TestRelayClass)
+    class_obj.add_message_handler(sock)
+    //
+    //
+    let path = Object.keys(class_obj.message_paths)[0]
+    t.is(path,"winding")
+    //
+    let m_handler = class_obj.messenger_connections['wiggly:pigly']
+    let message = {
+        "_m_path" : path,
+        "data" : "this is a test",
+        "_response_id" : 23,
+        "_test_lookup" : "A"
+    }
+
+    let data = Buffer.from(JSON.stringify(message))
+    await m_handler.data_handler(data)
+    //
+    t.is(T_test_message_lookup[message._test_lookup]._response_id,23)
+    t.is(call_results[sock.test_name].msg.data,"this is a test")
+    //
+    message = {
+        "_m_path" : path,
+        "_tx_op" : "G",
+        "data" : "this is a test",
+        "_response_id" : 24,
+        "_test_lookup" : "B"
+    }
+
+    data = Buffer.from(JSON.stringify(message))
+    await m_handler.data_handler(data)
+    //
+    t.is(T_test_message_lookup[message._test_lookup]._response_id,24)
+    t.is(call_results[sock.test_name].msg.data,"this is a test")
+    //
+    message = {
+        "_m_path" : path,
+        "_tx_op" : "D",
+        "data" : "this was a test",
+        "_response_id" : 25,
+        "_test_lookup" : "C"
+    }
+
+    data = Buffer.from(JSON.stringify(message))
+    await m_handler.data_handler(data)
+    //
+    t.is(T_test_message_lookup[message._test_lookup]._response_id,25)
+    t.is(call_results[sock.test_name].msg.data,"this was a test")
+
+    // 
+    message = {
+        "_m_path" : path,
+        "_tx_op" : "S",
+        "_ps_op"  : "sub",
+        "data" : "this was a test",
+        "_response_id" : 25,
+        "_test_lookup" : "C"
+    }
+
+    data = Buffer.from(JSON.stringify(message))
+    await m_handler.data_handler(data)
+    //
+
+    message = {
+        "_m_path" : path,
+        "_tx_op" : "S",
+        "_ps_op"  : "unsub",
+        "data" : "this was a test",
+        "_response_id" : 25,
+        "_test_lookup" : "C"
+    }
+
+    data = Buffer.from(JSON.stringify(message))
+    await m_handler.data_handler(data)
+    //
+
+
+    t.pass("framework OK")
 })
