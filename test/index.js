@@ -194,7 +194,6 @@ class TestRelayClass {
     }
 }
 
-// /*
 test('PathHandler - create', async t => {
     //
     let pconf = {
@@ -422,7 +421,7 @@ test("Message Endpoint - functional", async t => {
 })
 
 
-// */
+// * /
 
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
@@ -633,3 +632,81 @@ test("MessageRelayClient", async t => {
 
     t.pass("client class OK")
 })
+
+// * /
+
+test("MessageRelayClient - files", async t => {
+
+    let call_results = {}
+
+    class testSock extends EventEmitter {
+        constructor(name) {
+            super()
+            this.readyState = "open"
+            this.test_name = name
+            this.remoteAddress = "wiggly"
+            this.remotePort = "pigly"
+        }
+
+        write(msg) {
+            console.log(msg)
+            call_results[this.test_name] = JSON.parse(msg)
+        }
+
+        end() {}
+    }
+
+    class test_RC extends MessageRelayClient {
+        constructor(conf) {
+            super(conf)
+
+            this.socket = new testSock("wiggly-pigly")
+        }
+        //
+        _connect() {}
+        _setup_connection_handlers(client,conf) {}
+        
+    }
+
+    let conf = {
+        "port" : "wine",
+        "address" : "211 memoryville",
+        "send_on_reconnect" : true,
+        "tls" : undefined,
+        "files_only" : false,
+        "shunt_file" : "message_relay.txt",
+        "output_dir" : __dirname + "/messages",
+        "file_shunting" : true,
+        "ensure_directories" : true,
+        "file_per_message" : false,
+        "attempt_reconnect" : false
+    }
+
+    let relayer = new test_RC(conf)
+    await relayer._start_file_shunting(conf)
+
+    let message = {
+        "you" : "are",
+        "here" : true
+    }
+    await relayer.send_on_path(message,"twisty")
+
+    let hold_promises = []
+    await relayer._shutdown_files_going(hold_promises)
+
+
+    let resp_id = call_results["wiggly-pigly"]._response_id
+    message = {
+        "_response_id" : resp_id
+    }
+    setImmediate(() => {
+        let data = Buffer.from(JSON.stringify(message))
+        relayer._handle_message_data(data)
+    })
+    
+    await Promise.all(hold_promises)
+
+
+    t.pass("client class OK")
+})
+
