@@ -1,6 +1,6 @@
 {
   "name": "message-relay-services",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A simple server to route message to other services, such as email, admin, etc.",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,10 @@
     "message",
     "relay"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/copious-world/message-relay-services.git"
+  },
   "author": "Richard Leddy",
   "license": "ISC",
   "directories": {

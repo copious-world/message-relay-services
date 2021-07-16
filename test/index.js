@@ -6,10 +6,10 @@ let path_constuctor = require("../path-handler/path-handler")
 let PathHandler = path_constuctor.PathHandler
 //
 //
-
 let MessageEndpoint = require('../lib/message_endpoint')
 let MessageRelay = require('../lib/message_relay')
-
+let MessageRelayClient = require('../lib/message_relay_client');
+const { EventEmitter } = require('events');
 //
 
 test('json message queue: create class', t => {
@@ -562,4 +562,74 @@ test("message_relay service", async t => {
 
 
     t.pass("framework OK")
+})
+
+
+
+test("MessageRelayClient", async t => {
+
+    let call_results = {}
+
+    class testSock extends EventEmitter {
+        constructor(name) {
+            super()
+            this.readyState = "open"
+            this.test_name = name
+            this.remoteAddress = "wiggly"
+            this.remotePort = "pigly"
+        }
+
+        write(msg) {
+            console.log(msg)
+            call_results[this.test_name] = JSON.parse(msg)
+        }
+
+        end() {}
+    }
+
+    class test_RC extends MessageRelayClient {
+        constructor(conf) {
+            super(conf)
+
+            this.socket = new testSock("wiggly-pigly")
+        }
+        //
+        _connect() {}
+        _setup_connection_handlers(client,conf) {}
+        
+    }
+
+    let conf = {
+        "port" : "wine",
+        "address" : "211 memoryville",
+        "send_on_reconnect" : true,
+        "tls" : undefined,
+        "files_only" : false,
+        "shunt_file" : "message_relay.txt",
+        "file_shunting" : true,
+        "file_per_message" : false,
+        "attempt_reconnect" : false
+    }
+
+    let relayer = new test_RC(conf)
+
+    let message = {
+        "you" : "are",
+        "here" : true
+    }
+    let p = relayer.send_on_path(message,"twisty")
+
+    let resp_id = call_results["wiggly-pigly"]._response_id
+
+    message = {
+        "_response_id" : resp_id
+    }
+    setImmediate(() => {
+        let data = Buffer.from(JSON.stringify(message))
+        relayer._handle_message_data(data)
+    })
+
+    await p
+
+    t.pass("client class OK")
 })
