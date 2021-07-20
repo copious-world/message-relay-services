@@ -1,19 +1,33 @@
 
+// 
+
 class JSONMessageQueue {
 
-    constructor(decoder) {
+    constructor(decoder,encoder) {
         this.message_queue = []
         this.last_message = ''
         this.current_message = {}
-        this.message_decoder = decoder
-        if ( decoder === false ) {
+        //
+        if ( (decoder === undefined) || (decoder === false) ) {
             this.message_decoder = this.default_decoder
+        } else {
+            this.message_decoder = decoder
+        }
+        //
+        if ( (encoder === undefined) || (encoder === false) ) {
+            this.message_encoder = this.default_encoder
+        } else {
+            this.message_encoder = encoder
         }
     }
     
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     set_decoder(decoder) {
         this.message_decoder = decoder
+    }
+
+    set_encoder(encoder) {
+        this.message_encoder = encoder
     }
 
     default_decoder(str) {
@@ -25,6 +39,11 @@ class JSONMessageQueue {
         }
         return false
     }
+
+    default_encoder(j_obj) {
+        return JSON.stringify(j_obj)
+    }
+
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
     add_data(data) {
@@ -67,16 +86,11 @@ class JSONMessageQueue {
 
 
     encode_message(message) {
-        return JSON.stringify(message)
+        return this.message_encoder(message)
     }
 
     decode_message(message_str) {
-        try {
-            let message = JSON.parse(message_str)
-            return message
-        } catch (e) {
-            return false
-        }
+        return this.message_decoder(message_str)
     }
 
 }

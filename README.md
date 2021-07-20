@@ -1,12 +1,13 @@
 # message-relay-services
  
-This javascript package exposes four basic classes and one luxury class:
+This javascript package exposes four basic classes and two luxury classes:
 
 1. **MessageRelayer**
 2. **ServeMessageRelay**
 3. **ServeMessageEndpoint**
 4. **PathHandler**
 5. **MultiRelayClient**
+6. **MultiPathRelayClient**
 
 The application should override these classes and create instance methods.
 
@@ -34,6 +35,7 @@ As far as networking and message queue subsystens go, those looking for a much l
 * **MessageRelayer**
 * **PathHandler** (from within ServeMessageRelay through MessageRelayer)
 * **MultiRelayClient**
+* **MultiPathRelayClient**
 
 #### Messages
 
@@ -352,12 +354,57 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 }
 ```
 
+### 5. ** MultiPathRelayClient**
+
+This class wraps around a map of *RelayClient*, path to *RelayClient*. The class exposes methods of the same name as those in *RelayClient*, but the certain methods add a path parameter.
+
+A * MultiPathRelayClient* instance will pick a peer connection according to the path parameter of a method and send a message to the specialized server (an EndpointServer for instance). It is not assumed that the endpoints at the ends of the relay are perform the same or similar as their path counterparts. 
+
+
+#### MultiPathRelayClient Configuration Example
+
+The * MultiPathRelayClient* configures each instance of a *MessageRelayer* according to path specific parameters.
+
+```
+{
+	"paths" : [
+		{
+			 "path" : "users",
+		    "port" : 5112,
+		    "address" : "localhost",
+		},
+		{
+			 "path" : "persistance",
+		    "port" : 5112,
+		    "address" : "192.168.10.10",
+		},
+		{
+			 "path" : "admin",
+		    "port" : 6118,
+		    "address" : "10.10.10.10",
+		}
+	]
+    "files_only" : false,
+    "output_dir" : "fail_over_persistence",
+    "output_file" : "/user_data.json",
+    "max_pending_messages" : false,
+    "file_shunting" : false,
+    "max_reconnect" : 24,
+    "reconnect_wait" : 5,
+    "attempt_reconnect" : true
+}
+```
+
+
 ## Helper Classes
 
 #### JSONMessageQueue
-> This class takes in the data buffers delivered by the data handlers listening on sockets. It parses the stream in to strings encoding objects. It converts the strings to JavaScript objects and enqueues them. It maintains a simple queue of objects and provides the *dequeue* method for classes that use it.
+> This class takes in the data buffers delivered by the data handlers listening on sockets. It parses the stream into strings encoding objects, a string per object. It converts each encoding string into JavaScript objects and enqueues them. It maintains a simple queue of objects and provides the *dequeue* method for classes that use it.
 
-Here its methods:
+Here are its methods:
+
+* **constructor(decoder,encoder)**
+> The constructor sets up instance variables and may set a customer encoder or decoder. Pass false for *decoder* and *encoder* for the default methods, which just implement JSON.parse and JSON.stringify.
 
 * **add_data(data)**
 > appends string data to the stream
@@ -366,15 +413,25 @@ Here its methods:
 > parses the stream, decodes the messages, and then enqueues it
 
 * **dequeue()**
-> Take the last message of the queue and returns it or false if the queue is empty
+> Takes the last message off the queue and returns it or false if the queue is empty. 
 
 * **set_decoder(decoder)**
 > allow the application to set its own decoder (working on text between braces, {})
+
+* **set_endcoder(encoder)**
+> allow the application to set its own encoder (working on text between braces, {})
 
 * **encode_message(message)**
 > available to the application to send encode a message that can be decoded by the decoder
 
 * **decode_message(message_str)**
 > call the decoder that has been set (default JSON.parse)
+
+> > The last two methods can be used throughout an application given access to a * JSONMessageQueue* object.
+
+###### *possible customizations*
+> Looking at this [msgpack](https://github.com/msgpack) for binary (near binary) transfer of messages.
+
+> It is poissible to do payload nesting from the point of view of custom encoders and decoders.
 
 
