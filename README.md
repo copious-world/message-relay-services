@@ -369,19 +369,19 @@ The * MultiPathRelayClient* configures each instance of a *MessageRelayer* accor
 {
 	"paths" : [
 		{
-			 "path" : "users",
-		    "port" : 5112,
-		    "address" : "localhost",
+			"path" : "users",
+			"port" : 5112,
+			"address" : "localhost",
 		},
 		{
-			 "path" : "persistance",
-		    "port" : 5112,
-		    "address" : "192.168.10.10",
+			"path" : "persistance",
+			"port" : 5112,
+			"address" : "192.168.10.10"
 		},
 		{
-			 "path" : "admin",
-		    "port" : 6118,
-		    "address" : "10.10.10.10",
+			"path" : "admin",
+			"port" : 6118,
+			"address" : "10.10.10.10"
 		}
 	]
     "files_only" : false,
