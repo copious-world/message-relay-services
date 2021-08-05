@@ -28,6 +28,8 @@ class PathHandler extends EventEmitter {
         this.conf = conf
         this.message_relayer = false
         this.RelayerClass = FanoutRelayerClass
+        this.update_listeners = false
+        this.topic_listeners = {}
         this.init(conf)
     }
 
@@ -52,16 +54,42 @@ class PathHandler extends EventEmitter {
         return response
     }
 
-    async subscribe(topic,msg,handler) {
-        await this.message_relayer.subscribe(topic,this.path,msg,handler)       // add another event listener
+    async subscribe(topic,msg,handler) { // the hanlder is for a particular topic and handler (listener)
+        if ( (this.topic_listeners[topic] === undefined) || !(Array.isArray(this.topic_listeners[topic])) ) {
+            this.topic_listeners[topic] = [handler]
+            let group_handler =  ((tt,self) => {
+                return (msg_obj) => {
+                    let all_listeners = self.topic_listeners[tt]
+                    for ( let listener of all_listeners ) {
+                        listener(msg_obj)
+                    }
+                }
+            })(topic,this)
+            await this.message_relayer.subscribe(topic,this.path,msg,group_handler)       // add another event listener
+        } else if ( Array.isArray(this.topic_listeners[topic]) ) { // be overly cautious
+            this.topic_listeners[topic].push(handler)
+        }
     }
 
-    async unsubscribe(topic) {
-        return await this.message_relayer.unsubscribe(topic,this.path)
+    async unsubscribe(topic,handler) {
+        if ( this.topic_listeners[topic] !== undefined ) {
+            let all_listeners = this.topic_listeners[topic]
+            let ii = all_listeners.indexOf(handler)
+            all_listeners.splice(ii,1)
+            if ( all_listeners.length === 0 ) {
+                // when no more listers are left tell the endpoint connection to stop subsribing
+                delete this.topic_listeners[topic]  // make it undefined
+                return await this.message_relayer.unsubscribe(topic,this.path)
+            }
+        }
     }
 
-    request_cleanup(handler) {
-        this.message_relayer.removeListener('update',handler)
+    request_cleanup() {
+        if ( this.update_listeners ) {
+            for ( let listener of this.update_listeners ) {
+                this.message_relayer.removeListener('update',listener)                
+            }
+        }
     }
 }
 
@@ -118,9 +146,10 @@ class PersistenceHandler extends PathHandler {
     init(conf) {
         super.init(conf)
         if ( conf.listeners ) {
+            this.update_listeners = conf.listeners
             conf.listeners.forEach(listener => {
                 // most likely stick things in the local database
-                this.message_relayer.on('update',listener.objects)
+                this.message_relayer.on('update',listener)
             })
         }
     }
@@ -135,9 +164,10 @@ class NotificationHandler extends PathHandler {
     init(conf) {
         super.init(conf)
         if ( conf.listeners ) {
+            this.update_listeners = conf.listeners
             conf.listeners.forEach(listener => {
                 // most likely stick things in the local database
-                this.message_relayer.on('update',listener.objects)
+                this.message_relayer.on('update',listener)
             })
         }
     }
