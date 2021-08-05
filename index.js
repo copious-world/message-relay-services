@@ -15,3 +15,7 @@ module.exports.ServeMessageEndpoint = ServerMessageEndpoint
 module.exports.PathHandler = PathHandler
 module.exports.MultiRelayClient = MultiRelayClient
 module.exports.MultiPathRelayClient = MultiPathRelayClient
+
+module.exports.RelayCommunicator = ServerMessageRelay.Communicator
+module.exports.EndpointCommunicator = ServerMessageEndpoint.Communicator
+module.exports.MessengerCommunicator = ClientMessageRelay.Communicator

@@ -13,6 +13,18 @@ The application should override these classes and create instance methods.
 
 In this group of modules, MultiRelayClient is deemed a luxury class. It is a wrapper around a collection of MessageRelayer objects. It allows a rough form of load balancing for those applications using more than one peer processor.
 
+The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a *Communicator* class. 
+
+* **RelayCommunicator**
+* **EndpointCommunicator**
+* **MessengerCommunicator**
+
+These classes only know of a **writer** object they are assigned. Otherwise, they have two similar methods, 1) **add\_data\_and\_react(**client\_name**,**buffer**)** for servers and 2) **client\_add\_data\_and\_react(**buffer**)** for clients. These methods take in a data buffer which carries some part of a string represenation of a JSON object. Descendants of the these classes set the **writer** object once communication is established. For example, the default classes include the following line:
+
+```
+this.writer = socket // where socket is returned from connect
+```
+
 ### Purpose
 
 These classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well.
@@ -312,10 +324,10 @@ The *ServeMessageRelay* makes use of the following methods when calling a *PathH
 > Forwards the message through the MessageRelay instance
 
 * **subscribe(topic,msg,handler)**
-> Forwards the subscription through the MessageRelay instance. Installs a handler made by the ServeMessageRelay instance.
+> Forwards the subscription through the MessageRelayClient instance for the first subscription of the topic. And, sets up a single publication handler for all possible clients expected to subscribe. Installs a handler made by the ServeMessageRelay instance on behalf of each client subscribed to be called by the handler installed in the MessageRelayClient.
 
-* **unsubscribe(topic,msg)**
-> Calls the MessageRelay unsubscribe with this.path for the path parameter.
+* **unsubscribe(topic,handler)**
+> Calls the removes the handler from subscription. If there no more handlers, this will call its MessageRelayClient *unsubscribe* method.
 
 
 ### 5. **MultiRelayClient**
@@ -354,7 +366,7 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 }
 ```
 
-### 5. ** MultiPathRelayClient**
+### 5. **MultiPathRelayClient**
 
 This class wraps around a map of *RelayClient*, path to *RelayClient*. The class exposes methods of the same name as those in *RelayClient*, but the certain methods add a path parameter.
 
@@ -426,7 +438,6 @@ Here are its methods:
 
 * **decode_message(message_str)**
 > call the decoder that has been set (default JSON.parse)
-
 > > The last two methods can be used throughout an application given access to a * JSONMessageQueue* object.
 
 ###### *possible customizations*
