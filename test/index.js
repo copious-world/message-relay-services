@@ -10,6 +10,7 @@ let MessageEndpoint = require('../lib/message_endpoint')
 let MessageRelay = require('../lib/message_relay')
 let MessageRelayClient = require('../lib/message_relay_client');
 const { EventEmitter } = require('events');
+const { resolve } = require('path');
 //
 
 test('json message queue: create class', t => {
@@ -624,11 +625,15 @@ test("MessageRelayClient", async t => {
     message = {
         "_response_id" : resp_id
     }
-    setImmediate(() => {
-        let data = Buffer.from(JSON.stringify(message))
-        relayer.client_add_data_and_react(data)
+    let p2 = new Promise((resolve,reject) => {
+        setImmediate(() => {
+            let data = Buffer.from(JSON.stringify(message))
+            relayer.client_add_data_and_react(data)
+            resolve(true)
+        })    
     })
 
+    await p2
     await p
 
     t.pass("client class OK")
@@ -688,7 +693,7 @@ test("MessageRelayClient - files", async t => {
     await relayer._start_file_shunting(conf)
 
     let message = {
-        "you" : "are",
+        "you" : "are 2",
         "here" : true
     }
     await relayer.send_on_path(message,"twisty")
@@ -700,14 +705,199 @@ test("MessageRelayClient - files", async t => {
     message = {
         "_response_id" : resp_id
     }
-    setImmediate(() => {
-        let data = Buffer.from(JSON.stringify(message))
-        relayer.client_add_data_and_react(data)
-    })
-    
-    await Promise.all(hold_promises)
 
+    let p2 = new Promise((resolve,reject) => {
+        setImmediate(() => {
+            let data = Buffer.from(JSON.stringify(message))
+            relayer.client_add_data_and_react(data)
+            resolve(true)
+        })    
+    })
+
+
+    await p2
+    console.dir(hold_promises)
+    await Promise.all(hold_promises)
 
     t.pass("client class OK")
 })
 
+
+
+
+test('PathHandler - pub/sub', async t => {
+
+    let call_results = {}
+
+
+    class testSock extends EventEmitter {
+        constructor(name) {
+            super()
+            this.readyState = "open"
+            this.test_name = name
+            this.remoteAddress = "wiggly"
+            this.remotePort = "pigly"
+        }
+
+        write(msg) {
+            console.log("testSock." + "write ..." + msg)
+            let mm = JSON.parse(msg)
+            let a_topic = mm.topic
+            if ( call_results[a_topic]  === undefined  ) {
+                call_results[a_topic] = {}
+                console.log("strange topic: " + a_topic)
+            }
+            call_results[a_topic][this.test_name] = mm
+        }
+
+        end() {}
+    }
+
+    class test_RC extends MessageRelayClient {
+        constructor(conf) {
+            super(conf)
+
+            this.socket = new testSock("wiggly-pigly")
+            this.writer = this.socket
+        }
+        //
+        _connect() {}
+        _setup_connection_handlers(client,conf) {}
+        
+    }
+
+    //
+    let pconf = {
+        "relay" : {
+            "test_parameters" : {
+                
+            }
+        }
+    }
+    //
+    let p_handler = new PathHandler('tests',pconf,test_RC)
+    t.is(p_handler.message_relayer.constructor.name,"test_RC")
+    
+    //
+    // make an array of writers
+    let writer_names = [ "A", "B", "C", "D", "E", "F", "G", "H", "I"]
+    let all_writers = writer_names.map(w_name => {
+        return new testSock(w_name)
+    })
+
+
+    let topics = ["SUB-TEST1", "SUB-TEST2"]
+    let listeners = {"SUB-TEST1" : [], "SUB-TEST2" : []}
+
+    for ( let topic of topics ) {
+        //
+        let msg = {
+            "name" : topic
+        }
+        //
+        all_writers.forEach ( async a_writer => {
+            let listener = ((wrtr,tt) => {      // forward publication to the client (this socket)
+                return (msg) => {
+                        msg.topic = tt
+                        let forwarded = JSON.stringify(msg)
+                        //wrtr.write(forwarded)
+                        return wrtr.test_name
+                    }
+                }
+            )(a_writer,topic)                       
+            listeners[topic][a_writer.test_name] = listener  // for a generic cleanup
+            await p_handler.subscribe(topic,msg,listener)
+            //
+            t.is(msg.name,topic)
+            t.is(msg.topic,topic)
+            t.is(msg._m_path,'tests')
+            t.is(msg._ps_op,'sub')
+        })
+        //
+    }
+
+    for ( let topic of topics ) {
+        let listens = p_handler.topic_listeners[topic]
+        for ( let i = 0; i < listens.length; i++ ) {
+            let msg = {
+                "name" : topic
+            }
+            let w_name = writer_names[i]
+            let listener = p_handler.topic_listeners[topic][i]
+            let tst_name = listener(msg)
+            t.is(w_name,tst_name)
+        }
+    }
+
+
+
+    for ( let topic of topics ) {
+        //
+        all_writers.forEach ( async a_writer => {
+            let listener = listeners[topic][a_writer.test_name] // for a generic cleanup
+            await p_handler.unsubscribe(topic,listener)
+        })
+        //
+    }
+
+    for ( let topic of topics ) {
+        // initialize here
+        call_results[topic] = {}
+        //
+        let msg = {
+            "name" : topic
+        }
+        //
+        all_writers.forEach ( async a_writer => {
+            let listener = ((wrtr,tt) => {      // forward publication to the client (this socket)
+                return (msg) => {
+                        msg.topic = tt
+                        let forwarded = JSON.stringify(msg)
+                        wrtr.write(forwarded)
+                    }
+                }
+            )(a_writer,topic)                       
+            listeners[topic][a_writer.test_name] = listener  // for a generic cleanup
+            await p_handler.subscribe(topic,msg,listener)
+            //
+            t.is(msg.name,topic)
+            t.is(msg.topic,topic)
+            t.is(msg._m_path,'tests')
+            t.is(msg._ps_op,'sub')
+        })
+        //
+    }
+
+    for ( let a_topic of topics ) { 
+        let P_msg = {
+            "topic" : a_topic,
+            "_m_path" : 'tests'
+        }
+        let topic = P_msg.topic
+        let path = P_msg._m_path
+        p_handler.message_relayer.emit(`update-${topic}-${path}`,P_msg)
+    }
+
+    let p = new Promise((resolve,reject) => {
+        setTimeout(() => {
+            resolve(call_results)
+        },5)
+    })
+
+
+    let final_results = await p;
+
+    console.dir(final_results)
+
+    for ( let test_topic of topics ) {
+        t.is(final_results[test_topic]["B"].topic,test_topic)
+        t.is(final_results[test_topic]["D"]._m_path,"tests")
+    }
+
+
+
+
+    // path,path_conf,FanoutRelayerClass
+    //
+    t.pass("used path handler class")
+})
