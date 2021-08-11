@@ -234,7 +234,7 @@ test('PathHandler - create', async t => {
     t.is(msg.topic,"SUB-TEST")
     t.is(msg._m_path,'tests')
     t.is(msg._ps_op,'sub')
-    t.is(p_handler.message_relayer.subcriptions[`update-${topic}-${path}`],handler)
+    t.is(p_handler.topic_listeners["SUB-TEST"][0],handler)
     //
     msg = {
         "name" : "SUB TEST"
@@ -244,7 +244,7 @@ test('PathHandler - create', async t => {
     t.is(resp._m_path,'tests')
     t.is(resp.topic,"SUB-TEST")
     t.is(resp._ps_op,'unsub')
-    t.is(p_handler.message_relayer.subcriptions[`update-${topic}-${path}`],undefined)
+    t.is(p_handler.topic_listeners["SUB-TEST"],undefined)
     //
     let expected_keys = {
         "user" : "UserHandler", 
@@ -483,14 +483,14 @@ test("message_relay service", async t => {
 
     let sock = new testSock("wiggly-pigly")
 
-    let class_obj = new test_Relay(conf,TestRelayClass)
-    class_obj.add_message_handler(sock)
+    let relay_class_obj = new test_Relay(conf,TestRelayClass)
+    relay_class_obj.add_message_handler(sock,sock.test_name)
     //
     //
-    let path = Object.keys(class_obj.message_paths)[0]
+    let path = Object.keys(relay_class_obj.message_paths)[0]
     t.is(path,"winding")
     //
-    let m_handler = class_obj.messenger_connections['wiggly:pigly']
+    let m_handler = relay_class_obj.messenger_connections['wiggly-pigly']
     let message = {
         "_m_path" : path,
         "data" : "this is a test",
@@ -591,6 +591,7 @@ test("MessageRelayClient", async t => {
             super(conf)
 
             this.socket = new testSock("wiggly-pigly")
+            this.writer = this.socket
         }
         //
         _connect() {}
@@ -625,7 +626,7 @@ test("MessageRelayClient", async t => {
     }
     setImmediate(() => {
         let data = Buffer.from(JSON.stringify(message))
-        relayer._handle_message_data(data)
+        relayer.client_add_data_and_react(data)
     })
 
     await p
@@ -649,7 +650,7 @@ test("MessageRelayClient - files", async t => {
         }
 
         write(msg) {
-            console.log(msg)
+            console.log("testSock." + "write ..." + msg)
             call_results[this.test_name] = JSON.parse(msg)
         }
 
@@ -661,6 +662,7 @@ test("MessageRelayClient - files", async t => {
             super(conf)
 
             this.socket = new testSock("wiggly-pigly")
+            this.writer = this.socket
         }
         //
         _connect() {}
@@ -692,8 +694,7 @@ test("MessageRelayClient - files", async t => {
     await relayer.send_on_path(message,"twisty")
 
     let hold_promises = []
-    await relayer._shutdown_files_going(hold_promises)
-
+    await relayer._shutdown_files_going(hold_promises,true)
 
     let resp_id = call_results["wiggly-pigly"]._response_id
     message = {
@@ -701,7 +702,7 @@ test("MessageRelayClient - files", async t => {
     }
     setImmediate(() => {
         let data = Buffer.from(JSON.stringify(message))
-        relayer._handle_message_data(data)
+        relayer.client_add_data_and_react(data)
     })
     
     await Promise.all(hold_promises)

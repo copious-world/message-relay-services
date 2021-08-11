@@ -10,14 +10,18 @@ class JSONMessageQueue {
         //
         if ( (decoder === undefined) || (decoder === false) ) {
             this.message_decoder = this.default_decoder
-        } else {
+        } else if ( decoder !== this.decode_message ) {
             this.message_decoder = decoder
+        } else {
+            this.message_decoder = this.default_decoder
         }
         //
         if ( (encoder === undefined) || (encoder === false) ) {
             this.message_encoder = this.default_encoder
-        } else {
+        } else if ( encoder !== this.message_encoder ) {
             this.message_encoder = encoder
+        } else {
+            this.message_encoder = this.default_encoder
         }
     }
     

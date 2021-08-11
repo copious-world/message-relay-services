@@ -11,7 +11,7 @@ This javascript package exposes four basic classes and two luxury classes:
 
 The application should override these classes and create instance methods.
 
-In this group of modules, MultiRelayClient is deemed a luxury class. It is a wrapper around a collection of MessageRelayer objects. It allows a rough form of load balancing for those applications using more than one peer processor.
+In this group of modules, *MultiRelayClient* is deemed a luxury class. It is a wrapper around a collection of MessageRelayer objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
 
 The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a *Communicator* class. 
 
@@ -19,7 +19,7 @@ The classes listed above are default Internet classes that provde TCP or TLS cli
 * **EndpointCommunicator**
 * **MessengerCommunicator**
 
-These classes only know of a **writer** object they are assigned. Otherwise, they have two similar methods, 1) **add\_data\_and\_react(**client\_name**,**buffer**)** for servers and 2) **client\_add\_data\_and\_react(**buffer**)** for clients. These methods take in a data buffer which carries some part of a string represenation of a JSON object. Descendants of the these classes set the **writer** object once communication is established. For example, the default classes include the following line:
+These classes only know of a **writer** object they are assigned. Otherwise, they have two similar methods, 1) **add\_data\_and\_react(**client\_name**,**buffer**)** for servers and 2) **client\_add\_data\_and\_react(**buffer**)** for clients. These methods take in a data buffer which carries some part of a string represenation of a JSON object, brace delimited **\{\}**. Descendants of the these classes set the **writer** object once communication is established. For example, the default classes include the following line:
 
 ```
 this.writer = socket // where socket is returned from connect
@@ -29,7 +29,7 @@ this.writer = socket // where socket is returned from connect
 
 These classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well.
 
-The network architecture that these classes are meant for is one that is fairly well fixed. For example, these may work well for applications in a cluster. So, preconfiguration of IP addresses is assumed.
+The network architecture that these classes are meant for is one that is fairly well fixed. For example, these may work well for applications in a cluster. So, preconfiguration of IP addresses is assumed. (*However, the* ***multi*** *classes provide for adding and removing connectors. For instance, in* ***MultiPathRelayClient***, *paths may be added and deleted, each with its own connection.*)
 
 The main use of these classes has been for transfering meta data (data about data) from a web dashboards and desktop applications to services that provide information for small servers such as blogs. One current application writes JSON objects to directories on a machine that hosts blog servers. In such applications, some of the meta data may refer to IDs of data which can be used to attain access to larger data objects outside the realm of the cluster. 
 
