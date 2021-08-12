@@ -10,7 +10,7 @@ let MessageEndpoint = require('../lib/message_endpoint')
 let MessageRelay = require('../lib/message_relay')
 let MessageRelayClient = require('../lib/message_relay_client');
 const { EventEmitter } = require('events');
-const { resolve } = require('path');
+
 //
 
 test('json message queue: create class', t => {
@@ -884,7 +884,6 @@ test('PathHandler - pub/sub', async t => {
         },5)
     })
 
-
     let final_results = await p;
 
     console.dir(final_results)
@@ -893,9 +892,6 @@ test('PathHandler - pub/sub', async t => {
         t.is(final_results[test_topic]["B"].topic,test_topic)
         t.is(final_results[test_topic]["D"]._m_path,"tests")
     }
-
-
-
 
     // path,path_conf,FanoutRelayerClass
     //
