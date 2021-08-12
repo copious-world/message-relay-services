@@ -9,6 +9,9 @@ let PathHandler = path_constuctor.PathHandler
 let MessageEndpoint = require('../lib/message_endpoint')
 let MessageRelay = require('../lib/message_relay')
 let MessageRelayClient = require('../lib/message_relay_client');
+
+let RelayCommunicator = MessageRelay.Communicator
+
 const { EventEmitter } = require('events');
 
 //
@@ -485,7 +488,7 @@ test("message_relay service", async t => {
     let sock = new testSock("wiggly-pigly")
 
     let relay_class_obj = new test_Relay(conf,TestRelayClass)
-    relay_class_obj.add_message_handler(sock,sock.test_name)
+    relay_class_obj.add_connection(sock.test_name,sock)
     //
     //
     let path = Object.keys(relay_class_obj.message_paths)[0]
@@ -897,3 +900,211 @@ test('PathHandler - pub/sub', async t => {
     //
     t.pass("used path handler class")
 })
+
+
+
+test('Relay - pub/sub', async t => {
+
+    let call_results = {}
+
+
+    class testSock extends EventEmitter {
+        constructor(name) {
+            super()
+            this.readyState = "open"
+            this.test_name = name
+            this.remoteAddress = "wiggly"
+            this.remotePort = "pigly"
+        }
+
+        write(msg) {
+            console.log("testSock." + "write ..." + msg)
+            let mm = JSON.parse(msg)
+            let a_topic = mm.topic
+            if ( call_results[a_topic]  === undefined  ) {
+                call_results[a_topic] = {}
+                console.log("strange topic: " + a_topic)
+            }
+            call_results[a_topic][this.test_name] = mm
+        }
+
+        end() {}
+    }
+
+    class test_RC extends MessageRelayClient {
+        constructor(conf) {
+            super(conf)
+
+            this.socket = new testSock("wiggly-pigly")
+            this.writer = this.socket
+        }
+        //
+        _connect() {}
+        _setup_connection_handlers(client,conf) {}
+    }
+
+    class test_RelayCommunicator extends RelayCommunicator {
+        //
+        constructor(conf) {
+            super(conf,test_RC)
+
+            this.socket = new testSock("wiggly-pigly")
+            this.writer = this.socket
+        }
+
+        init() {
+            // what goes here? for a test
+        }
+    }
+
+    let path_handler_factory = (path,path_conf,FanoutRelayerClass) => {
+        //
+        let pc = new PathHandler(path,path_conf,FanoutRelayerClass)
+        return pc
+    }
+
+    let conf = {
+        "path_types" :  { 
+            "test" : {
+                "relay" :{
+                    "files_only" : false,
+                    "output_dir" : "fail_over_user",
+                    "output_file" : "/user_data.json",
+                    "port" : 5114,
+                    "address" : "localhost",
+                    "max_pending_messages" : false,
+                    "file_shunting" : false,
+                    "max_reconnect" : 24,
+                    "reconnect_wait" : 5,
+                    "attempt_reconnect" : false
+                }
+            }, 
+            "best" : {
+                "relay" : {
+                    "files_only" : false,
+                    "output_dir" : "fail_over_user",
+                    "output_file" : "/user_data.json",
+                    "port" : 5116,
+                    "address" : "localhost",
+                    "max_pending_messages" : false,
+                    "file_shunting" : false,
+                    "max_reconnect" : 24,
+                    "reconnect_wait" : 5,
+                    "attempt_reconnect" : false
+                }
+            }, 
+            "jest" :  {
+                "relay" : {
+                    "files_only" : false,
+                    "output_dir" : "fail_over_user",
+                    "output_file" : "/user_data.json",
+                    "port" : 5118,
+                    "address" : "localhost",
+                    "max_pending_messages" : false,
+                    "file_shunting" : false,
+                    "max_reconnect" : 24,
+                    "reconnect_wait" : 5,
+                    "attempt_reconnect" : false
+                }
+            }
+        },
+        "path_handler_factory" : path_handler_factory
+    }
+
+
+    let test_rc = new test_RelayCommunicator(conf)
+
+    t.is(Object.keys(test_rc.message_paths).length,3)
+
+    for ( let path in test_rc.message_paths ) {
+        let p_handler = test_rc.message_paths[path]
+        t.is(p_handler.path,path)
+        t.is(p_handler.message_relayer.constructor.name, "test_RC")
+        t.is(p_handler.message_relayer.writer.constructor.name, "testSock")
+    }
+
+
+
+    let subscription_results = {}
+
+    class subSock extends testSock {
+        constructor(name) {
+            super(name)
+            this.remoteAddress = "humpdee"
+            this.remotePort = "dumpdee"
+        }
+
+        write(msg) {
+            console.log("testSock." + "write ..." + msg)
+            let mm = JSON.parse(msg)
+            let a_topic = mm.topic
+            if ( subscription_results[a_topic]  === undefined  ) {
+                subscription_results[a_topic] = {}
+                console.log("strange topic: " + a_topic)
+            }
+            subscription_results[a_topic][this.test_name] = mm
+        }
+
+        end() {}
+    }
+
+
+    let all_socks = []
+    for ( let i = 0; i < 10; i++ ) {
+        let client_name = `ACLIENT_${i}`
+        let sock = new subSock(client_name)
+        test_rc.add_connection(client_name,sock)
+        all_socks.push(sock)
+    }
+
+    let topics = ["SUB-TEST1", "SUB-TEST2"]
+    for ( let sock of all_socks ) {
+        let name = sock.test_name
+        for ( let topic of topics ) {
+            for ( let path in test_rc.message_paths ) {
+                let sub_message = {
+                    "topic" : topic,
+                    "_m_path" : path,
+                    "_ps_op" : 'sub' 
+                }
+                let sub_message_bytes = Buffer.from(JSON.stringify(sub_message))
+                test_rc.add_data_and_react(name,sub_message_bytes)
+            }
+        }
+    }
+
+    //
+
+    console.dir(test_rc.messenger_connections)
+    for ( let path in test_rc.message_paths ) {
+        let mpath = test_rc.message_paths[path]
+        t.is(mpath.path,path)
+        let subs = mpath.message_relayer.subcriptions
+        for ( let topic of topics ) {
+            let ev_name = `update-${topic}-${path}`
+            t.true(ev_name in subs)
+
+            //
+            let m_relayer = mpath.message_relayer
+            let pub_message = {
+                "topic" : topic,
+                "_m_path" : path,
+                "message" : "have a nice day"
+            }
+            let publish_buffer = Buffer.from(JSON.stringify(pub_message))
+            m_relayer.client_add_data_and_react(publish_buffer)
+            //
+        }
+    }
+
+
+    setImmediate(() => {
+        console.dir(subscription_results)
+    },1000)
+
+
+    t.pass("link relay to path handler to message-relay-client")
+
+})
+
+
