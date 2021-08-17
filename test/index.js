@@ -282,7 +282,7 @@ test("Message Endpoint - functional", async t => {
             super(conf)
         }
 
-        init() {
+        _init() {
             // do nothing... 
         }
 
@@ -457,7 +457,7 @@ test("message_relay service", async t => {
             super(conf,fanoutRelayer)
         }
 
-        init() {
+        _init() {
         }
 
     }
@@ -952,7 +952,7 @@ test('Relay - pub/sub', async t => {
             this.writer = this.socket
         }
 
-        init() {
+        _init() {
             // what goes here? for a test
         }
     }
@@ -1108,3 +1108,211 @@ test('Relay - pub/sub', async t => {
 })
 
 
+test('Connecting class intialization', async t => {
+
+    class test_EndPoint extends MessageEndpoint {
+        constructor(conf) {
+            super(conf)
+        }
+
+        _create_connection() {
+            if ( !(this.use_tls) ) {
+                //this.connection = net.createServer((sock) => { this.onClientConnected_func(sock) })
+            } else {
+                this.options = {
+                    key: (typeof this.tls_conf.server_key === "string"), // fs.readFileSync(this.tls_conf.server_key),
+                    cert: (typeof this.tls_conf.server_cert === "string"),  // fs.readFileSync(this.tls_conf.server_cert),
+                    requestCert: true,  // using client certificate authentication
+                    ca: [ (typeof this.tls_conf.client_cert === "string") ] // fs.readFileSync(this.tls_conf.client_cert)  client uses a self-signed certificate
+                };
+                //this.connection = tls.createServer(options,((sock) => { this.onClientConnected_func(sock) }));    
+            }
+            /*
+            this.connection.listen(this.port, this.address, () => {
+                console.log(`Server started at: ${this.address}:${this.port}`);
+            });
+            */
+        }
+    
+
+    }
+
+
+    class test_MessageRelay extends MessageRelay {
+        constructor(conf) {
+            super(conf)
+        }
+        _create_connection() {
+            if ( !(this.use_tls) ) {
+                this.net_con = "simples server" //  net.createServer(this.onClientConnected_func);
+            } else {
+                this.options = {
+                    key: (typeof this.tls_conf.server_key === "string"), // fs.readFileSync(this.tls_conf.server_key),
+                    cert: (typeof this.tls_conf.server_cert === "string"),  // fs.readFileSync(this.tls_conf.server_cert),
+                    requestCert: true,  // using client certificate authentication
+                    ca: [ (typeof this.tls_conf.client_cert === "string") ] // fs.readFileSync(this.tls_conf.client_cert)  client uses a self-signed certificate
+                };
+                this.net_con = "tls server"
+                //this.net_con = tls.createServer(options,this.onClientConnected_func);    
+            }
+            //
+            /*
+            if ( this.net_con ) {
+                this.net_con.listen(this.port, this.address, () => {
+                    console.log(`Server started at: ${this.address}:${this.port}`);
+                });    
+            }
+            */
+        }
+    }
+
+    
+    class test_MessageRelayClient extends MessageRelayClient {
+        constructor(conf) {
+            super(conf)
+        }
+
+        _setup_connection_handlers(client,conf) {}
+
+        _create_connection() {
+            if ( !(this.use_tls) ) {
+                this.net_con = "simples server" //  net.createServer(this.onClientConnected_func);
+            } else {
+                this.options = {
+                    key: (typeof this.tls_conf.server_key === "string"), // fs.readFileSync(this.tls_conf.server_key),
+                    cert: (typeof this.tls_conf.server_cert === "string"),  // fs.readFileSync(this.tls_conf.server_cert),
+                    requestCert: true,  // using client certificate authentication
+                    ca: [ (typeof this.tls_conf.client_cert === "string") ] // fs.readFileSync(this.tls_conf.client_cert)  client uses a self-signed certificate
+                };
+                this.net_con = "tls server"
+                //this.net_con = tls.createServer(options,this.onClientConnected_func);    
+            }
+            //
+            /*
+            if ( this.net_con ) {
+                this.net_con.listen(this.port, this.address, () => {
+                    console.log(`Server started at: ${this.address}:${this.port}`);
+                });    
+            }
+            */
+        }
+    }
+
+
+    let endpoint = new test_EndPoint({
+        app_handles_subscriptions : true,
+        port : 5111,
+        address : "192.168.1.1",
+        tls : false
+
+    })
+    t.is(endpoint.port,5111)
+    t.is(endpoint.options,undefined)
+    t.is(endpoint.use_tls,false)
+
+    let endpoint_tls = new test_EndPoint({
+        app_handles_subscriptions : true,
+        port : 5111,
+        address : "192.168.1.1",
+        tls : {
+            server_key : "A file name",
+            server_cert : "A file name",
+            client_cert : "A file name"
+        }
+
+    })
+    t.is(endpoint_tls.port,5111)
+    t.is(endpoint_tls.options.key,true)
+    t.is(endpoint_tls.options.cert,true)
+    t.is(endpoint_tls.options.ca[0],true)
+    t.is(endpoint_tls.tls_conf.server_key,"A file name")
+    t.is(endpoint_tls.tls_conf.server_cert,"A file name")
+    t.is(endpoint_tls.tls_conf.client_cert,"A file name")
+    t.is(endpoint_tls.use_tls,true)
+
+    // RELAY
+
+    let relay = new test_MessageRelay({
+        app_handles_subscriptions : true,
+        port : 5111,
+        address : "192.168.1.1",
+        tls : false,
+
+        "path_types" : {
+            "winding" : {
+                "relay" : {
+                    "junk" : "junk"
+                }
+            }
+        },
+        "path_handler_factory" : (a_path,conf,anythinv) =>  {
+            return a_path + " from path_handler_factory"
+        }
+    })
+    t.is(relay.port,5111)
+    t.is(relay.options,undefined)
+    t.is(relay.use_tls,false)
+
+    let relay_tls = new test_MessageRelay({
+        port : 5111,
+        address : "192.168.1.1",
+        tls : {
+            server_key : "A file name",
+            server_cert : "A file name",
+            client_cert : "A file name"
+        },
+
+        "path_types" : {
+            "winding" : {
+                "relay" : {
+                    "junk" : "junk"
+                }
+            }
+        },
+        "path_handler_factory" : (a_path,conf,anythinv) => {
+            return a_path + " from path_handler_factory"
+        }
+    })
+
+    t.is(relay_tls.port,5111)
+    t.is(relay_tls.options.key,true)
+    t.is(relay_tls.options.cert,true)
+    t.is(relay_tls.options.ca[0],true)
+    t.is(relay_tls.tls_conf.server_key,"A file name")
+    t.is(relay_tls.tls_conf.server_cert,"A file name")
+    t.is(relay_tls.tls_conf.client_cert,"A file name")
+    t.is(relay_tls.use_tls,true)
+
+    
+    let mrc = new test_MessageRelayClient({
+        attempt_reconnect : false,
+        port : 5111,
+        address : "192.168.1.1",
+        tls : false
+
+    })
+    t.is(mrc.port,5111)
+    t.is(mrc.options,undefined)
+    t.is(mrc.use_tls,false)
+
+    let mrc_tls = new test_MessageRelayClient({
+        attempt_reconnect : false,
+        port : 5111,
+        address : "192.168.1.1",
+        tls : {
+            server_key : "A file name",
+            server_cert : "A file name",
+            client_cert : "A file name"
+        }
+
+    })
+    t.is(mrc_tls.port,5111)
+    t.is(mrc_tls.options.key,true)
+    t.is(mrc_tls.options.cert,true)
+    t.is(mrc_tls.options.ca[0],true)
+    t.is(mrc_tls.tls_conf.server_key,"A file name")
+    t.is(mrc_tls.tls_conf.server_cert,"A file name")
+    t.is(mrc_tls.tls_conf.client_cert,"A file name")
+    t.is(mrc_tls.use_tls,true)
+
+})
