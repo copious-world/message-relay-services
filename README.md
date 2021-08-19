@@ -140,7 +140,50 @@ const tls_options = {
 
 ```
 
+## Special Events
 
+Special events pertain to the following classes:
+
+* **MessageRelayer**
+* **MultiRelayClient**
+* **MultiPathRelayClient**
+
+There are a few events available at the application level that relay the connection event emitted to a client. Some applications will want to wait for these events before sending messages.
+
+If files contain messages due to a lapse, in connection, messages will begin forwarded before these events are emitted.
+
+* **MessageRelayer** `on('client-ready', (address,port) => { ... })`
+
+> The addess is the connection address and the port is the connection port.
+
+* **MultiRelayClient** `on('peer-ready',(info)=> {...})` 
+
+> Info is the following:
+> 
+> ```
+> {
+    'port' : port,
+    'address' : addr,
+    'configured-address' : address
+}
+```
+>
+> *addr* and *address* should be the same.
+
+* **MultiPathRelayClient** `on('path-ready',(info)=> {...})` 
+
+> Info is the following:
+> 
+>```
+> {
+    'path' : path,
+    'port' : port,
+    'address' : addr,
+    'configured-address' : address
+}
+```
+>
+> *addr* and *address* should be the same.
 
 ## Classes
 
@@ -149,7 +192,6 @@ Two of the classes provide server functions. Two provde client functions. One cl
 While these classes are very common among networking projects, they provide a fairly straightfoward path for breaking up services on a small gang of really small processors. There is no attempt to serve a generic large distribution of like processors. These are helping bring up services that are planned for interfacing larger scale efforts. Futhermore, these classes provide a framework for introducing replacement code in other languages other than JavaScript.
 
 So, the pub/sub mechanism is based on local JavaScript maps. They also have fairly well planned and configured endpoints. 
-
 
 ### 1. **MessageRelayer**
 
