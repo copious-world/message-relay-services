@@ -83,6 +83,64 @@ It's up to the application to make the *PathHandler* objects as simple or comple
 
 Please refer to the configuration sections within each class description.
 
+#### TLS
+
+Follow the node.js settings for TLS configuration.
+
+For using application supplied keys and certs, configurations include a *tls* field wich is a structure as such: 
+
+Server Version in *ServeMessageRelay* and *ServeMessageEndpoint*:
+
+```
+// the configuration JSON
+// conf
+{
+	tls : {
+		"server_key" : "server key pem file",
+		"server_cert" : "server cert file",
+		"client_cert" : "client cert file"
+	}
+}
+
+// Later these are translated into options: 
+
+this.tls_conf = conf.tls
+let base = process.cwd()
+const options = {
+    key: fs.readFileSync(`${base}/${this.tls_conf.client_key}`),
+    cert: fs.readFileSync(`${base}/${this.tls_conf.client_cert}`),
+    ca: [ fs.readFileSync(`${base}/${this.tls_conf.server_cert}`) ],
+    checkServerIdentity: () => { return null; },
+};
+
+```
+
+Client Version in *MessageRelayer*:
+
+```
+// the configuration JSON
+// conf
+{
+	tls : {
+		"client_key" : "client key pem file",
+		"client_cert" : "client cert file",
+		"server_cert" : "server cert file"
+	}
+}
+
+// Later these are translated into options: 
+
+let base = process.cwd()
+const tls_options = {
+    key: fs.readFileSync(`${base}/${this.tls_conf.client_key}`),
+    cert: fs.readFileSync(`${base}/${this.tls_conf.client_cert}`),
+    ca: [ fs.readFileSync(`${base}/${this.tls_conf.server_cert}`) ],
+    checkServerIdentity: () => { return null; },
+};
+
+```
+
+
 
 ## Classes
 
@@ -102,53 +160,6 @@ The *MessageRelayer* class may be configured to send messages over its transport
 Several types of file activity are possible. The *MessageRelayer* instance may write to files while a connection is broken, or it may only ever write to files. If it writes to files, it may write each message to its own file or it may write messages to a single file in a stream. (Files are written to a local directory.) There is also an option to send the messages from the backup file after the connection is reestablished
 
 The *MessageRelayer* **\_response\_id** is generated from a list of free id's stored within the *MessageRelayer* instance. Configurations may include ***max\_pending\_messages*** to set an upper limit on the number of messages waiting for response. If this configuration field is not supplied, the default is 100.
-
-#### TLS
-
-Follow the node.js settings for TLS configuration. Or overide configuration to use default by including the field ***default\_tls*** and setting it to true.
-
-For use application supplied keys and certs, configurations include a *tls* field wich is a structure as such: 
-
-Server Version in *ServeMessageRelay* and *ServeMessageEndpoint*:
-
-```
-this.tls_conf = conf.tls = {
-	server_key : "server key pem file",
-	server_cert : "server cert file",
-	client_cert : "client cert file"
-}
-
-// Later these are translated to options: 
-
-const options = {
-    key: fs.readFileSync(this.tls_conf.server_key),
-    cert: fs.readFileSync(this.tls_conf.server_cert),
-    requestCert: true,  // using client certificate authentication
-    ca: [ fs.readFileSync(this.tls_conf.client_cert) ] //client uses a self-signed certificate
-};
-
-```
-
-Client Version in *MessageRelayer*:
-
-```
-this.tls_conf = conf.tls = {
-	client_key : "server key pem file",
-	client_cert : "server cert file",
-	server_cert : "client cert file"
-}
-
-// Later these are translated to options: 
-
-const options = {
-    key: fs.readFileSync(this.tls_conf.server_key),
-    cert: fs.readFileSync(this.tls_conf.server_cert),
-    requestCert: true,  // using client certificate authentication
-    ca: [ fs.readFileSync(this.tls_conf.client_cert) ] //client uses a self-signed certificate
-};
-
-```
-
 
 #### *Methods*
 
@@ -223,7 +234,7 @@ This is a relay server that has several path types that can be found in the type
 
 Notice that each path handler configuraion has a *relay* field containing configuration information for the MessageRelayer that the PathHandler instance creates.
 
-In the following, the *tls* field calls out various key and cert files. In order to use node.js default TLS settings, include the field ***default\_tls*** and set it to true.
+In the following, the *tls* field calls out various key and cert files.
 
 ```
 {
