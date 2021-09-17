@@ -1,6 +1,6 @@
 {
   "name": "message-relay-services",
-  "version": "0.4.8",
+  "version": "0.5.1",
   "description": "A simple server to route message to other services, such as email, admin, etc.",
   "main": "index.js",
   "scripts": {
