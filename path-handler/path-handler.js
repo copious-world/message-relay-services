@@ -8,6 +8,7 @@ const PERSISTENCE_PATH = 'persistence'  // most things take this path (data obje
 const EMAIL_PATH = 'outgo_email'        // app email -- likely to a spool file or mailbox file
 const CONTACT_PATH = 'contact'          // intake spool similar to email or same with proper interface
 const NOTIFICATION_PATH = 'notify'      // admin or user to user (should be a special endpoint)
+const PEER_PUBLISHER = 'peer_publish'
 // ---- ---- ---- ---- ---- ---- ---- ----
 const g_path_impls = {
     'outgo_email' : null,
@@ -42,6 +43,10 @@ class PathHandler extends EventEmitter {
         return response
     }
 
+    async send_pub(message,json_writer) {
+        return this.send(message) // -- this is a default behavior
+    }
+
     async get(message) {
         let op_message = Object.assign({},message)
         let response = await this.message_relayer.send_op_on_path(op_message,this.path,'G')
@@ -57,19 +62,41 @@ class PathHandler extends EventEmitter {
     async subscribe(topic,msg,handler) { // the hanlder is for a particular topic and handler (listener)
         if ( (this.topic_listeners[topic] === undefined) || !(Array.isArray(this.topic_listeners[topic])) ) {
             this.topic_listeners[topic] = [handler]
-            let group_handler =  ((tt,self) => {
+            let group_handler =  ((tt,self) => {        // this will drop down into the handler in the relay client class
                 return (msg_obj) => {
                     let all_listeners = self.topic_listeners[tt]
                     for ( let listener of all_listeners ) {
-                        listener(msg_obj)
+                        listener(msg_obj)                   // everybody on this path will get the message going through
                     }
                 }
             })(topic,this)
+            // att the group handler to the handler response on the message_relayer -->
             await this.message_relayer.subscribe(topic,this.path,msg,group_handler)       // add another event listener
         } else if ( Array.isArray(this.topic_listeners[topic]) ) { // be overly cautious
             this.topic_listeners[topic].push(handler)
         }
     }
+
+
+    async subscribe_with_insert(topic,msg,handler,insert_group_action) { // the hanlder is for a particular topic and handler (listener)
+        if ( (this.topic_listeners[topic] === undefined) || !(Array.isArray(this.topic_listeners[topic])) ) {
+            this.topic_listeners[topic] = [handler]
+            let group_handler =  ((tt,self,one_time_action) => {        // this will drop down into the handler in the relay client class
+                return (msg_obj) => {
+                    one_time_action(msg_obj)
+                    let all_listeners = self.topic_listeners[tt]
+                    for ( let listener of all_listeners ) {
+                        listener(msg_obj)                   // everybody on this path will get the message going through
+                    }
+                }
+            })(topic,this,insert_group_action)
+            // att the group handler to the handler response on the message_relayer -->
+            await this.message_relayer.subscribe(topic,this.path,msg,group_handler)       // add another event listener
+        } else if ( Array.isArray(this.topic_listeners[topic]) ) { // be overly cautious
+            this.topic_listeners[topic].push(handler)
+        }
+    }
+
 
     async unsubscribe(topic,handler) {
         if ( this.topic_listeners[topic] !== undefined ) {
@@ -92,6 +119,76 @@ class PathHandler extends EventEmitter {
         }
     }
 }
+
+
+
+
+class PeerPublishingHandler extends PathHandler {
+    constructor(conf,FanoutRelayerClass) {
+        super(PEER_PUBLISHER,conf,FanoutRelayerClass)
+        this.all_topic_subscribers = {}
+    }
+
+    //
+    init(conf) {
+        super.init(conf)
+    }
+
+    async send_pub(message,json_writer) {
+        //
+        let topic = message.topic
+        let msg_str = JSON.stringify(message)
+        let all_subscribers = this.all_topic_subscribers[topic]
+        for ( let jw of all_subscribers ) {
+            if ( jw !== json_writer ) {
+                let writer = json_writer.writer
+                if ( writer ) {
+                    writer.write(msg_str)
+                }
+            }
+        }
+        //
+        return await this.send(message)  // the message continues on 
+    }
+
+    #insert_subscriber(topic,json_writer) { // the hanlder is for a particular topic and handler (listener)
+        let t_list = this.all_topic_subscribers[topic]
+        if ( t_list === undefined ) {
+            t_list = []
+            this.all_topic_subscribers[topic] = t_list
+        }
+        if ( t_list.indexOf(json_writer) < 0 ) {
+            t_list.push(json_writer)
+        }
+    }
+
+    #remove_subscriber(topic,json_writer) {
+        let t_list = this.all_topic_subscribers[topic]
+        if ( t_list !== undefined ) {
+            this.all_topic_subscribers[topic]
+            let all_subscibers = this.all_topic_subscribers[topic]
+            let ii = all_subscibers.indexOf(json_writer)
+            all_subscibers.splice(ii,1)
+        }
+    }
+
+    async subscribe(topic,msg,handler,json_writer,group_insert_action) { // the hanlder is for a particular topic and handler (listener)
+        // handle membership
+        this.#insert_subscriber(topic,json_writer)
+        // setup publication forwarding from downstream servers
+        await super.subscribe_with_insert(topic,msg,handler,group_insert_action)
+    }
+
+
+    async unsubscribe(topic,handler,json_writer) {
+        if ( json_writer ) {
+            this.#remove_subscriber(topic,json_writer)
+        }
+        await super.unsubscribe(topic,handler)
+    }
+
+}
+
 
 
 class OutgoingEmailHandler extends PathHandler {
@@ -180,12 +277,12 @@ g_path_classes[PERSISTENCE_PATH] = PersistenceHandler
 g_path_classes[EMAIL_PATH] = OutgoingEmailHandler
 g_path_classes[CONTACT_PATH] = ContactHandler
 g_path_classes[NOTIFICATION_PATH] = NotificationHandler
-
+g_path_classes[PEER_PUBLISHER] = PeerPublishingHandler
 
 function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
     let PathClass = g_path_classes[path]
     if ( PathClass !== undefined ) {
-        let pc = new PathClass(path_conf,FanoutRelayerClass)
+        let pc = new PathClass(path,path_conf,FanoutRelayerClass)
         g_path_impls[path] = pc
         return(pc)
     }
@@ -207,3 +304,4 @@ module.exports.NOTIFICATION_PATH = NOTIFICATION_PATH
 // // // CLASSES
 module.exports.classes = g_path_classes     // applications may want to override the class implementations given here.
 module.exports.PathHandler = PathHandler
+module.exports.PeerPublishingHandler = PeerPublishingHandler
