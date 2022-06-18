@@ -13,7 +13,7 @@ module.exports.ServeMessageRelay = ServerMessageRelay
 module.exports.ServeMessageEndpoint = ServerMessageEndpoint
 //
 module.exports.PathHandler = PathHandler
-modeul.exports.PeerPublishingHandler = PeerPublishingHandler
+module.exports.PeerPublishingHandler = PeerPublishingHandler
 module.exports.path_hanlder_classes = classes
 module.exports.MultiRelayClient = MultiRelayClient
 module.exports.MultiPathRelayClient = MultiPathRelayClient
