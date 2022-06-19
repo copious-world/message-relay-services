@@ -124,8 +124,9 @@ class PathHandler extends EventEmitter {
 
 
 class PeerPublishingHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
-        super(PEER_PUBLISHER,conf,FanoutRelayerClass)
+    constructor(path,conf,FanoutRelayerClass) {
+        path = ((typeof path === 'string') ? path : PEER_PUBLISHER)
+        super(path,conf,FanoutRelayerClass)
         this.all_topic_subscribers = {}
     }
 
