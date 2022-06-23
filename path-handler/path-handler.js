@@ -131,10 +131,12 @@ class PeerPublishingHandler extends PathHandler {
     }
 
     //
+    /*
     init(conf) {
         super.init(conf)
     }
-
+    */
+   
     async send_pub(message,json_writer) {
         //
         let topic = message.topic
