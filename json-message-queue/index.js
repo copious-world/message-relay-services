@@ -54,6 +54,10 @@ class JSONMessageQueue {
         this.last_message += data.toString()
     }
 
+    add_object(m_obj) {
+        this.message_queue.push(m_obj)
+    }
+
     // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     //
     message_complete() {
