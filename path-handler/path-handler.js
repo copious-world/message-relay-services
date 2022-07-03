@@ -142,7 +142,7 @@ class PeerPublishingHandler extends PathHandler {
         let topic = message.topic
         let msg_str = JSON.stringify(message)
         let all_subscribers = this.all_topic_subscribers[topic]
-        for ( let jw of all_subscribers ) {
+        for ( let jw of all_subscribers ) {     // back to client sibling, clients of relay
             if ( jw !== json_writer ) {
                 let writer = json_writer.writer
                 if ( writer ) {
@@ -150,7 +150,8 @@ class PeerPublishingHandler extends PathHandler {
                 }
             }
         }
-        //
+        //  further into backend -- including ipc sibling  
+        //  -- (all the necessary fields for publication should be here already)
         return await this.send(message)  // the message continues on 
     }
 
