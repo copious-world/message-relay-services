@@ -6,9 +6,9 @@ const MultiPathRelayClient = require('./lib/mutli_path_relay_client')
 //
 const {PathHandler,PeerPublishingHandler,classes} = require('./path-handler/path-handler')
 
-
 const ServerWithIPC = require('./lib/message_endpoint_as_child_with_ipc')
 const IPCClient = require('./lib/message_relay_ipc')
+const JSONMessageQueue = require('./json-message-queue')
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
@@ -21,10 +21,11 @@ module.exports.PeerPublishingHandler = PeerPublishingHandler
 module.exports.path_hanlder_classes = classes
 module.exports.MultiRelayClient = MultiRelayClient
 module.exports.MultiPathRelayClient = MultiPathRelayClient
-
+//
 module.exports.RelayCommunicator = ServerMessageRelay.Communicator
 module.exports.EndpointCommunicator = ServerMessageEndpoint.Communicator
 module.exports.MessengerCommunicator = ClientMessageRelay.Communicator
+module.exports.JSONMessageQueue = JSONMessageQueue
 
 
 //
@@ -35,3 +36,7 @@ module.exports.IPCClient = IPCClient
 
 module.exports.ServerWithIPCommunicator = ServerWithIPC.Communicator
 module.exports.IPCClientCommunicator = IPCClient.Communicator
+
+
+module.exports.JsonMessageHandlerRelay = ServerMessageRelay.JsonMessageHandlerRelay
+module.exports.EndpointReplier = ServerMessageEndpoint.EndpointReplier

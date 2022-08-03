@@ -1,17 +1,21 @@
 # message-relay-services
  
-This javascript package exposes four basic classes and two luxury classes:
+This javascript package exposes four basic classes, two extension classes, a class for intercepting publication on a path, and two classes for using IPC communication, and finally the message queuing class:
 
 1. **MessageRelayer**
 2. **ServeMessageRelay**
 3. **ServeMessageEndpoint**
 4. **PathHandler**
-5. **MultiRelayClient**
-6. **MultiPathRelayClient**
+5. **PeerPublishingHandler**
+6. **MultiRelayClient**
+7. **MultiPathRelayClient**
+8. **ServerWithIPC**
+9. **IPCClient**
+10. **JSONMessageQueue**
 
-The application should override these classes and create instance methods.
+Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often.
 
-In this group of modules, *MultiRelayClient* is deemed a luxury class. It is a wrapper around a collection of MessageRelayer objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
+In this group of modules, *MultiRelayClient* is deemed an extension class. It is a wrapper around a collection of *MessageRelayer* objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect on specific paths to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
 
 The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a *Communicator* class. 
 
@@ -24,6 +28,8 @@ These classes only know of a **writer** object they are assigned. Otherwise, the
 ```
 this.writer = socket // where socket is returned from connect
 ```
+
+In the IPC classes, the writer object is customized for IPC communication and the startup of child processes. This uses the node.js flavor of launching subproceses along with its exposed message handling between parents and children.
 
 ### Purpose
 
@@ -41,6 +47,7 @@ As far as networking and message queue subsystens go, those looking for a much l
 
 *  **ServeMessageRelay**
 *  **ServeMessageEndpoint**
+*  **ServerWithIPC**
 
 #### Clients
 
@@ -48,6 +55,7 @@ As far as networking and message queue subsystens go, those looking for a much l
 * **PathHandler** (from within ServeMessageRelay through MessageRelayer)
 * **MultiRelayClient**
 * **MultiPathRelayClient**
+* **IPCClient**
 
 #### Messages
 
@@ -75,7 +83,7 @@ The *ServeMessageRelay* instances use the path to hand of messages to downstream
 The set of path tags can be defined by the application. *ServeMessageRelay* takes a configuration object. In the configuration object, there are two fields that may be used to define paths through the *ServeMessageRelay*  instance.
 
 * **path_types** : [ \<a list of path tags as strings\> ]
-* **path_handler_factory** : \<the name of a module containing a PathHandler implementation\>
+* **path\_handler\_factory** : \<the name of a module containing a PathHandler implementation\>
 
 It's up to the application to make the *PathHandler* objects as simple or complex as they want. Perhaps path switching can be done. And, there is nothing stopping an application from chaining instances of *ServeMessageRelay*.
 
@@ -466,11 +474,11 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 }
 ```
 
-### 5. **MultiPathRelayClient**
+### 6. **MultiPathRelayClient**
 
 This class wraps around a map of *RelayClient*, path to *RelayClient*. The class exposes methods of the same name as those in *RelayClient*, but the certain methods add a path parameter.
 
-A * MultiPathRelayClient* instance will pick a peer connection according to the path parameter of a method and send a message to the specialized server (an EndpointServer for instance). It is not assumed that the endpoints at the ends of the relay are perform the same or similar as their path counterparts. 
+A *MultiPathRelayClient* instance will pick a peer connection according to the path parameter of a method and send a message to the specialized server (an EndpointServer for instance). It is not assumed that the endpoints at the ends of the relay are perform the same or similar as their path counterparts. 
 
 
 #### MultiPathRelayClient Configuration Example
@@ -506,6 +514,39 @@ The * MultiPathRelayClient* configures each instance of a *MessageRelayer* accor
     "attempt_reconnect" : true
 }
 ```
+
+
+### 7. **ServerWithIPC**
+
+The **ServerWithIPC** is subclass of the endpoint server. It does almost everything the same as an endpoint server. But, it extends the class initialization in order to set up a message handler for messages comming from its parent process. Also, it replaces the definition of the **writer** class with that of a **ProcWriter**. The **ProcWriter** has a *write* method that sends messages to the parent process.
+
+### 8. **IPCClient**
+
+The  **IPCClient** is a subclass of the common communicator class. Once messages are injested by this client, it operates the same as the other message relay classes which descend from the common communicator.
+
+This class differs in that it spawns a child processes as part of its initialization. Then, it sets up the IPC responses an installs a child process facing  **ProcWriter**. That is, the  **ProcWriter**  class is local to the **IPCClient** implementation and the **ProcWriter** instances send messages to the child processes they launch. The **ProcWriter** class is initialized (internally) with a handle to the child process. The **ProcWriter** for the server side uses the global variable for the parent process. While, there is **ProcWriter** for each child processes the parent launches.
+
+The configuration for a ** IPCClient** object does not need Internet parameters. It needs the name of a processes or an array containing a process name at the beginning with parameters following.
+
+For example: 
+
+```
+    "relay" : {
+        "proc_name" : ["global_session", "./sibling.conf"]
+    }
+
+```
+
+Or ... for just a node.js processes:
+
+```
+    "relay" : {
+        "proc_name" : "myprog.js"
+    }
+
+```
+
+The **IPCClient** class assumes that the child process implements **ServerWithIPC**.
 
 
 ## Helper Classes
@@ -544,5 +585,18 @@ Here are its methods:
 > Looking at this [msgpack](https://github.com/msgpack) for binary (near binary) transfer of messages.
 
 > It is poissible to do payload nesting from the point of view of custom encoders and decoders.
+
+
+## Overriding the Message Queue Class
+
+The JSON message queue, which the base class for queue handling in all the servers and clients, is written in a way to provide basic functionality for unloading JSON messages from string buffers and putting them into an object queue. There is no pretention that this class is written with any efficiency or elegance in mind. So, while it works well enough for small JSON objects riding through the clients and servers, it may be awkward for larger data objects, and it might be written more efficiently as well.
+
+There are two possible ways of replacing the class. One is to write a new base class with the same name and depositing it in the directory **json-message-queue** within the module. Another way is to override exposed classes for which it is a bases, changing methods, and then mentioning those new classes in the configuration files for applications.
+
+In other languages than JavaScript, this override might have been done in a different way. Also, there is the possibility of extracting the base class *JSONMessageQueue* and making npm manage differences. Perhaps something like this will be done in the future. For now, changes can be made more locally. It may mean that one or two methods has to be repeated in subclasses. 
+
+* **JsonMessageHandlerRelay**
+* **EndpointReplier**
+* **JSONMessageQueue**
 
 
