@@ -8,6 +8,7 @@ const {PathHandler,PeerPublishingHandler,classes} = require('./path-handler/path
 
 const ServerWithIPC = require('./lib/message_endpoint_as_child_with_ipc')
 const IPCClient = require('./lib/message_relay_ipc')
+const IPCChildClient = require('./lib/message_relay_ipc_source')
 const JSONMessageQueue = require('./json-message-queue')
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -33,10 +34,11 @@ module.exports.JSONMessageQueue = JSONMessageQueue
 //
 module.exports.ServerWithIPC = ServerWithIPC
 module.exports.IPCClient = IPCClient
+module.exports.IPCChildClient = IPCChildClient
 
 module.exports.ServerWithIPCommunicator = ServerWithIPC.Communicator
 module.exports.IPCClientCommunicator = IPCClient.Communicator
-
+module.exports.IPCChildClientCommunicator = IPCChildClient.Communicator
 
 module.exports.JsonMessageHandlerRelay = ServerMessageRelay.JsonMessageHandlerRelay
 module.exports.EndpointReplier = ServerMessageEndpoint.EndpointReplier
