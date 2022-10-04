@@ -7,8 +7,9 @@
     "test": "ava --verbose"
   },
   "keywords": [
-    "message",
-    "relay"
+    "message","relay",
+    "tcp", "tls", "ipc",
+    "client", "server", "json"
   ],
   "repository": {
     "type": "git",
