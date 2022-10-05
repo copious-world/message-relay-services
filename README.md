@@ -600,3 +600,23 @@ In other languages than JavaScript, this override might have been done in a diff
 * **JSONMessageQueue**
 
 
+## Async Client Relay Factory
+
+A method is available for use in async fucntion contexts, **new\_client\_relay**.
+
+This method takes the same parameters as the constructor for **MessageRelayer**.  This is a wrapper of the event 'client-ready'.
+
+Here is an example of its use:
+
+```
+const {new_client_relay} = require('message-relay-services')
+
+async function com_processings(conf) {
+	let relayer = await new_client_relay(conf)
+	//
+	// now the relay is ready for use
+	relayer.subscribe("topic1","a-path", (message) => {})
+}
+
+```
+

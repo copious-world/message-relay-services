@@ -49,3 +49,19 @@ module.exports.IPCChildClientCommunicator = IPCChildClient.Communicator
 
 module.exports.JsonMessageHandlerRelay = ServerMessageRelay.JsonMessageHandlerRelay
 module.exports.EndpointReplier = ServerMessageEndpoint.EndpointReplier
+
+
+
+module.expors.new_client_relay = async (conf,wrapper,reporter) => {
+    let relayer = new ClientMessageRelay(conf,wrapper)
+    let p = new Promise((resolve,reject) => {
+        relayer.on('client-ready',(address,port) => {
+            if ( typeof reporter === 'function' ) {
+                reporter(address,port)
+            }
+            resolve(relayer)
+        })
+    })
+    return p
+}
+
