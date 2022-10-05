@@ -2,6 +2,12 @@
 // class with no dependencies -- this keeps the response lambdas waiting for data back from a server
 // does not address expiration.. does not provide optimization beyon javascript capability
 
+
+
+const MAX_UNANSWERED_MESSAGES = 100
+
+
+
 class ResponseVector {
 
     constructor(conf) {
