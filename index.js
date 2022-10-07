@@ -30,6 +30,8 @@ module.exports.MultiPathRelayClient = MultiPathRelayClient
 module.exports.RelayCommunicator = ServerMessageRelay.Communicator
 module.exports.EndpointCommunicator = ServerMessageEndpoint.Communicator
 module.exports.MessengerCommunicator = ClientMessageRelay.Communicator
+module.exports.MessengerCommunicatorAPI = ClientMessageRelay.CommunicatorAPI
+
 module.exports.JSONMessageQueue = JSONMessageQueue
 //
 module.exports.ResponseVector = ResponseVector
@@ -64,4 +66,33 @@ module.exports.new_client_relay = async (conf,wrapper,reporter) => {
     })
     return p
 }
+
+
+module.exports.new_multi_peer_relay = async (conf,wrapper,reporter) => {
+    let relayer = new MultiRelayClient(conf,wrapper)
+    let p = new Promise((resolve,reject) => {
+        relayer.on('peer-ready',(descr) => {
+            if ( typeof reporter === 'function' ) {
+                reporter(descr.address,descr.port,descrp['configured-address'])
+            }
+            resolve(relayer)
+        })
+    })
+    return p
+}
+
+
+module.exports.new_multi_path_relay = async (conf,wrapper,reporter) => {
+    let relayer = new MultiPathRelayClient(conf,wrapper)
+    let p = new Promise((resolve,reject) => {
+        relayer.on('peer-ready',(descr) => {
+            if ( typeof reporter === 'function' ) {
+                reporter(descr.path,descr.address,descr.port,descrp['configured-address'])
+            }
+            resolve(relayer)
+        })
+    })
+    return p
+}
+
 

@@ -26,6 +26,7 @@ This javascript package exposes four basic classes, two extension classes, a cla
 
 Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
 
+A high level overview of the classes can be found in the [overview](#top-of-overview) section.
 The full definition of the classes is in the section, [Classes](#classes-class)
 
 
@@ -50,10 +51,23 @@ These classes, here in message-relay-services, don't examine meta data objects. 
 
 As far as networking and message queue subsystems go, those looking for a much larger suite of capabilities should look elsewhere. The idea here is that these classes supply sufficient communication for bootstrapping a small cluster based website. It may be the case that the classes comprise a simple enough of a framework for language transpilation a well, allowing applications first prototyped in JavaScript to be moved to other languages.
 
-
+<a name="top-of-overview"></a>
 ## Overview of Classes
 
-The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a [*Communicator*](#communicator-class) class. 
+The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a [*Communicator*](#communicator-class) class.
+
+The following sections are part of the overview:
+
+* [Classification of Classes](#classification-of-classes)
+* [Messages](#oveview-message)
+* [Pathways](#oveview-pathways)
+* [Multi-path Clients](#oveview-multi-path)
+* [Configuration](#oveview-configuration)
+* [Special Events](#oveview-special-events)
+
+<a name="classification-of-classes"></a>
+[top of oveview](#top-of-overview)
+### Classification of Classes
 
 Here is the same list broken down into its subclasses.
 
@@ -79,7 +93,16 @@ Here is the same list broken down into its subclasses.
 * [**JSONMessageQueue**](#jsonmessagequeue-class)
 
 
+#### Communicators
 
+* [**RelayCommunicator**](#communicator-class)
+* [**EndpointCommunicator**](#communicator-class)
+* [**MessengerCommunicator**](#communicator-class)
+* [**MessengerCommunicatorAPI**](#communicator-class)
+
+
+<a name="oveview-message"></a>
+[top of oveview](#top-of-overview)
 #### Messages
 
 With respect to the classes provided here, all messages are **JSON** objects. The JSON objects will have the structure required by the endpoint that consumes them. For the sake of passing the JSON objects through the servers, some particular field will be required. Application code must put in one or two fields with specific values. Some of the class methods will help in adding these fields.
@@ -92,6 +115,8 @@ With respect to the classes provided here, all messages are **JSON** objects. Th
 
 These are the only fields reserved by this package. (Note that *topic* is the only field without the underscore.)
 
+<a name="oveview-pathways"></a>
+[top of oveview](#top-of-overview)
 ### Pathways
 
 A **pathway**, as far as this package is concerned, is a *tagged* pathway from a client to an endpoint though servers. A **tag** is attached to a message.  (The message object field for this is **\_m\_path**.)
@@ -105,13 +130,14 @@ The set of path tags can be defined by the application. *ServeMessageRelay* take
 
 It's up to the application to make the *PathHandler* objects as simple or complex as they want. Perhaps path switching can be done. And, there is nothing stopping an application from chaining instances of *ServeMessageRelay*.
 
-
+<a name="oveview-multi-path"></a>
+[top of oveview](#top-of-overview)
 ### Multi-path Clients
 
 In this group of modules, *MultiRelayClient* is deemed an extension class. It is a wrapper around a collection of *MessageRelayer* objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect on specific paths to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
 
-
-
+<a name="oveview-configuration"></a>
+[top of oveview](#top-of-overview)
 ### Configuration
 
 Please refer to the configuration sections within each class description.
@@ -173,6 +199,8 @@ const tls_options = {
 
 ```
 
+<a name="oveview-special-events"></a>
+[top of oveview](#top-of-overview)
 ## Special Events
 
 Special events pertain to the following classes:
@@ -238,6 +266,41 @@ async function com_processings(conf) {
 
 ```
 
+Similarly, for each multi connection client class, a methods is available.
+
+* MultiRelayClient -> new\_multi\_peer\_relay
+* MultiPathRelayClient -> new\_multi\_path\_relay
+
+Here are examples of their uses:
+
+**MultiRelayClient**
+
+```
+const {new_multi_peer_relay} = require('message-relay-services')
+
+async function com_processings(conf) {
+	let relayer = await new_multi_peer_relay(conf)
+	// now the relay is ready for use
+	relayer.subscribe("topic1","a-path", (message) => {})
+}
+
+```
+
+**MultiPathRelayClient**
+
+```
+const {new_multi_path_relay} = require('message-relay-services')
+
+async function com_processings(conf) {
+	let relayer = await new_multi_path_relay(conf)
+	// now the relay is ready for use
+	relayer.subscribe("topic1","a-path", (message) => {})
+}
+
+```
+
+
+
 <a name="classes-class"/></a> [back to top](#top-of-doc)
 ## Classes
 
@@ -259,9 +322,52 @@ The definition of class begins here.
 <a name="communicator-class"/></a> [back to top](#top-of-doc)
 ### Communicator Class
 
-The communicator class provides a basic (vanilla) set of methods for communication that all client class use or override.
+The communicator class provides a basic (vanilla) set of methods for communication that all client class use or override. The classes expect that communications made through writers and message queues will be provided by descendant classes.
 
-#### *Methods*
+The client class provide just enough to send and receive messages provided its descendants implement the appropirate writers,
+
+#### clients communicatos
+* [**MessengerCommunicator**](#communicator-class)
+* [**MessengerCommunicatorAPI**](#messengercommunicatorapi-class)
+
+#### server communicators
+* [**RelayCommunicator**](#communicator-class)
+* [**EndpointCommunicator**](#communicator-class)
+
+
+<a name="messengercommunicatorapi-class" ></a>
+#### MessengerCommunicatorAPI *Methods*
+
+
+*  **async publish(topic,message)**
+> Adds the **\_ps\_op** field = 'pub'
+> Sets the **topic** filed to topic
+> Send the messages
+
+*  **async subscribe(topic,path,message,handler)**
+> Subscribes to a topic along the path.
+> The message object may be an empty object, or it may contain data for use by an endpoint.
+> The handler will run when pulications arrive along this pathway. The handler should have a single parameter for the inbound publication message.
+
+*  **unsubscribe(topic,path)**
+> Stop listening to publications to the topic along the path.
+
+*  **send_on_path(message,path)**
+> Send a message along the path. The **\_m\_path** field will be added.
+> When the message relay service is used, it will pick a relay client (networked through a MessageRelayer) that is configured for the path and send the message through it. These client objects are application specific. But, they use general methods expected by ServeMessageRelay. 
+
+*  **send_op_on_path(message,path,op)**
+> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = op.
+
+*  **set_on_path(message,path)**
+> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'S'.
+
+*  **get_on_path(message,path)**
+> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'G'.
+
+*  **del_on_path(message,path)**
+> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'D'.
+
 
 
 #### Specialized Communicators
@@ -301,37 +407,10 @@ The *MessageRelayer* **\_response\_id** is generated from a list of free id's st
 
 #### *Methods*
 
-*  **async publish(topic,message)**
-> Adds the **\_ps\_op** field = 'pub'
-> Sets the **topic** filed to topic
-> Send the messages
-
-*  **async subscribe(topic,path,message,handler)**
-> Subscribes to a topic along the path.
-> The message object may be an empty object, or it may contain data for use by an endpoint.
-> The handler will run when pulications arrive along this pathway. The handler should have a single parameter for the inbound publication message.
-
-*  **unsubscribe(topic,path)**
-> Stop listening to publications to the topic along the path.
-
-*  **send_on_path(message,path)**
-> Send a message along the path. The **\_m\_path** field will be added.
-> When the message relay service is used, it will pick a relay client (networked through a MessageRelayer) that is configured for the path and send the message through it. These client objects are application specific. But, they use general methods expected by ServeMessageRelay. 
-
-*  **send_op_on_path(message,path,op)**
-> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = op.
-
-*  **set_on_path(message,path)**
-> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'S'.
-
-*  **get_on_path(message,path)**
-> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'G'.
-
-*  **del_on_path(message,path)**
-> Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'D'.
-
 *  **closeAll()**
 > destroys the socket connection
+
+
 
 #### MessageRelays Configuration Example
 ```
