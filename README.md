@@ -1,5 +1,8 @@
 # message-relay-services
 
+
+These classes provide the base classes for managing JSON communication between clients and servers.
+
 * **Communication classes using JSON**
 * **Client classes with common communication methods**
 * **Server classes**: ***application endpoints*** and ***switching relays***
@@ -8,21 +11,22 @@
 
 ## Package Overview
 
-
 This javascript package exposes four basic classes, two extension classes, a class for intercepting publication on a path, and two classes for using IPC communication, and finally the message queuing class:
 
 1. [**MessageRelayer**](#messagerelayer-class)
 2. [**ServeMessageRelay**](#servemessagerelay-class)
-3. [**ServeMessageEndpoint**]
-4. [**PathHandler**]
-5. [**PeerPublishingHandler**]
-6. [**MultiRelayClient**]
-7. [**MultiPathRelayClient**]
-8. [**ServerWithIPC**]
-9. [**IPCClient**]
-10. [**JSONMessageQueue**]
+3. [**ServeMessageEndpoint**](#servemessageendpoint-class)
+4. [**PathHandler**](#pathhandler-class)
+5. [**PeerPublishingHandler**](#peerpublishinghandler-class)
+6. [**MultiRelayClient**](#multirelayclient-class)
+7. [**MultiPathRelayClient**](#multipathrelayclient-class)
+8. [**ServerWithIPC**](#serverwithipc-class)
+9. [**IPCClient**](#ipcclient-class)
+10. [**JSONMessageQueue**](#jsonmessagequeue-class)
 
-Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given.
+Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
+
+The full definition of the classes is in the section, [Classes](#classes-class)
 
 
 ### Install
@@ -32,50 +36,49 @@ npm install message-relay-service
 
 ### Purpose
 
-These classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well.
+These classes provide the base classes for managing JSON communication between clients and servers. 
+
+Instances of these classes pass **JSON** objects through ***pathways*** from application clients to application server endpoints. There is also a very simple pub/sub mechanism implemented in these classes as well; as it happens, the pub/sub mechanism is sometimes more useful than some of the call and response methods.
+
+The main use of these classes has been for transfering meta data (data about data) from a web dashboards and desktop applications to services that provide information for small servers such as blogs. For example, one current application writes JSON objects to directories on a machine that hosts blog servers. In such applications, some of the meta data may refer to IDs of data which can be used to attain access to larger data objects outside the realm of the cluster.
+
+The JSON messaging expects small JSON objects to be sent from process to process. Attention to the segmentation of large files is not part of the implementation of these classes. As such, large amounts of data are not accounted for. Instead, the objects may refer to larger data which may be transfered through respository gateways. Repository gateways, implemented in other packages, may interface to distributed file systems such as IPFS or bittorent or Chia. Outside references, identification of ownership of data, etc. may be part of the meta data. A number of paragraphs, human written text descriptions of data, may be within the JSON objects. The limits of JSON object size are determined by the networking operating system, node.js parameters, and JavaScript JSON parsing limits. Custom applications, those that override some of the messaging support classes, may find ways to get around these limits.
 
 The network architecture that these classes are meant for is one that is fairly well fixed. For example, these may work well for applications in a cluster. So, preconfiguration of IP addresses is assumed. (*However, the* ***multi*** *classes provide for adding and removing connectors. For instance, in* ***MultiPathRelayClient***, *paths may be added and deleted, each with its own connection.*)
 
-The main use of these classes has been for transfering meta data (data about data) from a web dashboards and desktop applications to services that provide information for small servers such as blogs. One current application writes JSON objects to directories on a machine that hosts blog servers. In such applications, some of the meta data may refer to IDs of data which can be used to attain access to larger data objects outside the realm of the cluster. 
+These classes, here in message-relay-services, don't examine meta data objects. They just pass messages. Some might refer to meta data carried in messages to be the "payload" of the message. But, we can say that ***these classes add particular fields to JSON messages to aid in their transport***. The benefit of this is that the application does not have to bother with adding the fields. The drawback can be that the field names are chosen constants which might interfere with an application; however, the have been chosen to make that coincidense unlikely. Please see the section on [reserved field names](#reserved-field-names).
 
-However, these classes, here in message-relay-services, don't examine meta data objects. They just pass messages. Some might refer to meta data carried in messages to be the "payload" of the message. But, we can say that ***these classes add particular fields to JSON messages to aid in their transport***.
-
-As far as networking and message queue subsystens go, those looking for a much larger suite of capabilities should look elsewhere. The idea here is that these classes supply sufficient communication for bootstrapping a small cluster based website. The may be a simple enough a framework for language transpilation a well.
+As far as networking and message queue subsystems go, those looking for a much larger suite of capabilities should look elsewhere. The idea here is that these classes supply sufficient communication for bootstrapping a small cluster based website. It may be the case that the classes comprise a simple enough of a framework for language transpilation a well, allowing applications first prototyped in JavaScript to be moved to other languages.
 
 
 ## Overview of Classes
 
-In this group of modules, *MultiRelayClient* is deemed an extension class. It is a wrapper around a collection of *MessageRelayer* objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect on specific paths to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
+The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a [*Communicator*](#communicator-class) class. 
 
-The classes listed above are default Internet classes that provde TCP or TLS clients and servers. Also, the first three modules each expose a *Communicator* class. 
-
-* **RelayCommunicator**
-* **EndpointCommunicator**
-* **MessengerCommunicator**
-
-These classes only know of a **writer** object they are assigned. Otherwise, they have two similar methods, 1) **add\_data\_and\_react(**client\_name**,**buffer**)** for servers and 2) **client\_add\_data\_and\_react(**buffer**)** for clients. These methods take in a data buffer which carries some part of a string represenation of a JSON object, brace delimited **\{\}**. Descendants of the these classes set the **writer** object once communication is established. For example, the default classes include the following line:
-
-```
-this.writer = socket // where socket is returned from connect
-```
-
-In the IPC classes, the writer object is customized for IPC communication and the startup of child processes. This uses the node.js flavor of launching subproceses along with its exposed message handling between parents and children.
-
-
+Here is the same list broken down into its subclasses.
 
 #### Servers
 
-*  **ServeMessageRelay**
-*  **ServeMessageEndpoint**
-*  **ServerWithIPC**
+* [**ServeMessageRelay**](#servemessagerelay-class)
+* [**ServeMessageEndpoint**](#servemessageendpoint-class)
+* [**ServerWithIPC**](#serverwithipc-class)
 
 #### Clients
 
-* **MessageRelayer**
-* **PathHandler** (from within ServeMessageRelay through MessageRelayer)
-* **MultiRelayClient**
-* **MultiPathRelayClient**
-* **IPCClient**
+* [**MessageRelayer**](#messagerelayer-class)
+* [**MultiRelayClient**](#multirelayclient-class)
+* [**MultiPathRelayClient**](#multipathrelayclient-class)
+* [**IPCClient**](#ipcclient-class)
+
+#### path relay
+* [**PathHandler**](#pathhandler-class)
+* [**PeerPublishingHandler**](#peerpublishinghandler-class)
+
+#### message buffering and parsing
+
+* [**JSONMessageQueue**](#jsonmessagequeue-class)
+
+
 
 #### Messages
 
@@ -101,6 +104,13 @@ The set of path tags can be defined by the application. *ServeMessageRelay* take
 * **path\_handler\_factory** : \<the name of a module containing a PathHandler implementation\>
 
 It's up to the application to make the *PathHandler* objects as simple or complex as they want. Perhaps path switching can be done. And, there is nothing stopping an application from chaining instances of *ServeMessageRelay*.
+
+
+### Multi-path Clients
+
+In this group of modules, *MultiRelayClient* is deemed an extension class. It is a wrapper around a collection of *MessageRelayer* objects. It allows a rough form of load balancing for those applications using more than one peer processor. The class *MultiPathRelayClient* is a wrapper around a collection of MessageRelayer objects, also. This allows for a client to connect on specific paths to some number of endpoints severs without a *MessageRelayer* in between, or it might connect to many different relayers each supporting some subset of paths that it uses.
+
+
 
 ### Configuration
 
@@ -208,17 +218,78 @@ If files contain messages due to a lapse, in connection, messages will begin for
 >
 > *addr* and *address* should be the same.
 
+
+#### Async Client Relay Factory
+
+This package makes a method available for use in async fucntion contexts, **new\_client\_relay**.
+
+This method takes the same parameters as the constructor for **MessageRelayer**.  This method is a wrapper of the event 'client-ready'.
+
+Here is an example of its use:
+
+```
+const {new_client_relay} = require('message-relay-services')
+
+async function com_processings(conf) {
+	let relayer = await new_client_relay(conf)
+	// now the relay is ready for use
+	relayer.subscribe("topic1","a-path", (message) => {})
+}
+
+```
+
+<a name="classes-class"/></a> [back to top](#top-of-doc)
 ## Classes
 
-Two of the classes provide server functions. Two provde client functions. One class provides multiple clients.
+The definition of class begins here.
 
-While these classes are very common among networking projects, they provide a fairly straightfoward path for breaking up services on a small gang of really small processors. There is no attempt to serve a generic large distribution of like processors. These are helping bring up services that are planned for interfacing larger scale efforts. Futhermore, these classes provide a framework for introducing replacement code in other languages other than JavaScript.
 
-So, the pub/sub mechanism is based on local JavaScript maps. They also have fairly well planned and configured endpoints. 
+1. [**MessageRelayer**](#messagerelayer-class)
+2. [**ServeMessageRelay**](#servemessagerelay-class)
+3. [**ServeMessageEndpoint**](#servemessageendpoint-class)
+4. [**PathHandler**](#pathhandler-class)
+5. [**PeerPublishingHandler**](#peerpublishinghandler-class)
+6. [**MultiRelayClient**](#multirelayclient-class)
+7. [**MultiPathRelayClient**](#multipathrelayclient-class)
+8. [**ServerWithIPC**](#serverwithipc-class)
+9. [**IPCClient**](#ipcclient-class)
+10. [**JSONMessageQueue**](#jsonmessagequeue-class)
+
+
+<a name="communicator-class"/></a> [back to top](#top-of-doc)
+### Communicator Class
+
+The communicator class provides a basic (vanilla) set of methods for communication that all client class use or override.
+
+#### *Methods*
+
+
+#### Specialized Communicators
+
+The following classes are specialized communicators.
+
+* **RelayCommunicator**
+* **EndpointCommunicator**
+* **MessengerCommunicator**
+
+The classes make connections with other processes communicating with the type of connection provided by their writer classes.
+
+These classes only know of a **writer** object they are assigned. Otherwise, they have two similar methods, 
+
+1) **add\_data\_and\_react(**client\_name**,**buffer**)** ...for **servers**   
+2) **client\_add\_data\_and\_react(**buffer**)** ..for **clients**. 
+
+These methods take in a data buffer which carries some part of a string represenation of a JSON object, brace delimited **\{\}**. Descendants of the these classes may set the **writer** object once communication is established. For example, the default classes include the following line:
+
+```
+this.writer = socket // where socket is returned from connect
+```
+
+In the IPC classes, the writer object is customized for IPC communication and the startup of child processes. This uses the node.js flavor of launching subproceses along with its exposed message handling between parents and children.
 
 
 <a name="messagerelayer-class"/></a> [back to top](#top-of-doc)
-### **MessageRelayer Class**
+### 1. **MessageRelayer**
 
 **MessageRelayer** is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
 
@@ -278,9 +349,9 @@ The *MessageRelayer* **\_response\_id** is generated from a list of free id's st
 }
 ```
 
-
-<a name="servemessagerelay-class" ></a>
-### 2. **ServeMessageRelay Class**
+<a name="servemessagerelay-class"/></a> [back to top](#top-of-doc)  
+[back to classes](#classes-class)
+### 2. **ServeMessageRelay**
 
 A *ServeMessageRelay* instance creates a server (TCP or TLS) when it is constructed. 
 
@@ -367,7 +438,7 @@ In the following, the *tls* field calls out various key and cert files.
 
 ```
 
-
+<a name="servemessageendpoint-class"/></a> [back to top](#top-of-doc)
 ### 3. **ServeMessageEndpoint**
 
 An endpoint server may often have the purpose of storing meta data about larger objects such as blog entries, media that may be streamed, images, etc. An endpoint application may store tables listing the meta data files owned by a particular user or entity as part of the bookkeeping associated with storing meta data. In one application, the meta data contains IPFS CIDs which blog services present as links to be retreived by streaming services.
@@ -429,7 +500,7 @@ Each top level field in the object below configures one of two endpoints. The po
 ```
 
 
-
+<a name="pathhandler-class"/></a> [back to top](#top-of-doc)
 ### 4. **PathHandler**
 
 Pathways are required for passing messages through *ServeMessageRelay*. Configuring the pathways helps in organizing an application around services that have been intentionally placed on machines within a cluster. If an application does not use *ServeMessageRelay* and just connects *MessageRelayer* instances to endpoints, *ServeMessageEndpoint* instances, then there will be no use for a PathHandler instance.
@@ -455,7 +526,13 @@ The *ServeMessageRelay* makes use of the following methods when calling a *PathH
 > Calls the removes the handler from subscription. If there no more handlers, this will call its MessageRelayClient *unsubscribe* method.
 
 
-### 5. **MultiRelayClient**
+<a name="peerpublishinghandler-class"/></a> [back to top](#top-of-doc)
+### 5. **PeerPublishingHandler**
+
+
+
+<a name="multirelayclient-class"/></a> [back to top](#top-of-doc)
+### 6. **MultiRelayClient**
 
 This class wraps around a list of *RelayClient* and exposes methods of the same name as those in *RelayClient*. The only difference is, a *MultiRelayClient* instance will pick a peer connection according to a schedule to send the message to. It is assumed that the endpoints at the ends of the relay are perform the same or similar and mutually beneficial services as their counterparts.
 
@@ -491,7 +568,9 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 }
 ```
 
-### 6. **MultiPathRelayClient**
+
+<a name="multipathrelayclient-class"/></a> [back to top](#top-of-doc)
+### 7. **MultiPathRelayClient**
 
 This class wraps around a map of *RelayClient*, path to *RelayClient*. The class exposes methods of the same name as those in *RelayClient*, but the certain methods add a path parameter.
 
@@ -533,11 +612,14 @@ The * MultiPathRelayClient* configures each instance of a *MessageRelayer* accor
 ```
 
 
-### 7. **ServerWithIPC**
+
+<a name="serverwithipc-class"/></a> [back to top](#top-of-doc)
+### 8. **ServerWithIPC**
 
 The **ServerWithIPC** is subclass of the endpoint server. It does almost everything the same as an endpoint server. But, it extends the class initialization in order to set up a message handler for messages comming from its parent process. Also, it replaces the definition of the **writer** class with that of a **ProcWriter**. The **ProcWriter** has a *write* method that sends messages to the parent process.
 
-### 8. **IPCClient**
+<a name="ipcclient-class"/></a> [back to top](#top-of-doc)
+### 9. **IPCClient**
 
 The  **IPCClient** is a subclass of the common communicator class. Once messages are injested by this client, it operates the same as the other message relay classes which descend from the common communicator.
 
@@ -568,6 +650,7 @@ The **IPCClient** class assumes that the child process implements **ServerWithIP
 
 ## Helper Classes
 
+<a name="jsonmessagequeue-class"/></a> [back to top](#top-of-doc)
 #### JSONMessageQueue
 > This class takes in the data buffers delivered by the data handlers listening on sockets. It parses the stream into strings encoding objects, a string per object. It converts each encoding string into JavaScript objects and enqueues them. It maintains a simple queue of objects and provides the *dequeue* method for classes that use it.
 
@@ -616,24 +699,13 @@ In other languages than JavaScript, this override might have been done in a diff
 * **EndpointReplier**
 * **JSONMessageQueue**
 
+<a name="reserved-field-names" ></a>
+## Reserved Field Names
 
-## Async Client Relay Factory
+* **\_m\_path** identifies the path for the message. The set of path tags can be defined by the application. 
+* **\_tx\_op** identifies an operation that specifies a limited set of operations identified by a single character. Among these are 'S','G','D' for Set, Get, and Delete
+* **\_ps\_op** identifies a **pub/sub** operation.
+* **topic** identifies a **pub/sub** topic.
+* **\_response\_id** is a field that the MessageRelayer adds to a message object in order to identify responses with message that were sent. Applications should not add this field to the top layer of their application messages.
 
-A method is available for use in async fucntion contexts, **new\_client\_relay**.
-
-This method takes the same parameters as the constructor for **MessageRelayer**.  This is a wrapper of the event 'client-ready'.
-
-Here is an example of its use:
-
-```
-const {new_client_relay} = require('message-relay-services')
-
-async function com_processings(conf) {
-	let relayer = await new_client_relay(conf)
-	//
-	// now the relay is ready for use
-	relayer.subscribe("topic1","a-path", (message) => {})
-}
-
-```
 
