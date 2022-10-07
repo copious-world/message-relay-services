@@ -9,7 +9,7 @@
 This javascript package exposes four basic classes, two extension classes, a class for intercepting publication on a path, and two classes for using IPC communication, and finally the message queuing class:
 
 1. **[MessageRelayer](#messagerelayer-class)**
-2. [**ServeMessageRelay**](#servemessagemelay-class)
+2. [**ServeMessageRelay**](#servemessagerelay-class)
 3. [**ServeMessageEndpoint**]
 4. [**PathHandler**]
 5. [**PeerPublishingHandler**]
