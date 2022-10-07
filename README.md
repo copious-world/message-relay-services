@@ -9,7 +9,7 @@
 This javascript package exposes four basic classes, two extension classes, a class for intercepting publication on a path, and two classes for using IPC communication, and finally the message queuing class:
 
 1. [**MessageRelayer**](#messagerelayer-class)
-2. [**ServeMessageRelay**](#servemessagemelay-class)
+2. [**ServeMessageRelay**](#servemessagerelay-class)
 3. [**ServeMessageEndpoint**]
 4. [**PathHandler**]
 5. [**PeerPublishingHandler**]
@@ -213,6 +213,7 @@ While these classes are very common among networking projects, they provide a fa
 
 So, the pub/sub mechanism is based on local JavaScript maps. They also have fairly well planned and configured endpoints. 
 
+<a name="messagerelayer-class"/>
 ### 1. **MessageRelayer Class**
 
 MessageRelayer is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
