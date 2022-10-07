@@ -4,7 +4,10 @@
 * **Client classes with common communication methods**
 * **Server classes**: ***application endpoints*** and ***switching relays***
 
+<a name="top-of-doc"/></a> 
+
 ## Package Overview
+
 
 This javascript package exposes four basic classes, two extension classes, a class for intercepting publication on a path, and two classes for using IPC communication, and finally the message queuing class:
 
@@ -213,10 +216,11 @@ While these classes are very common among networking projects, they provide a fa
 
 So, the pub/sub mechanism is based on local JavaScript maps. They also have fairly well planned and configured endpoints. 
 
-<a name="messagerelayer-class"/>
-### 1. **MessageRelayer Class**
 
-MessageRelayer is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
+<a name="messagerelayer-class"/></a> [back to top](#top-of-doc)
+### **MessageRelayer Class**
+
+**MessageRelayer** is the class that a client application may use to send a message on its pathway. You may find its implementation in ./lib/message_relay_client.js.
 
 The *MessageRelayer* class may be configured to send messages over its transport (TCP or TLS) connected to one peer. Or, it may be configured to write messages to files. There is also an option to write messages to files when the network connection fails, and another option to send the messages from the file after the connection is reestablished.
 
@@ -275,7 +279,7 @@ The *MessageRelayer* **\_response\_id** is generated from a list of free id's st
 ```
 
 
-
+<a name="servemessagerelay-class" ></a>
 ### 2. **ServeMessageRelay Class**
 
 A *ServeMessageRelay* instance creates a server (TCP or TLS) when it is constructed. 
