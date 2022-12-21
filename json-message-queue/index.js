@@ -81,7 +81,11 @@ class JSONMessageQueue {
             if ( m_obj ) {
                 this.message_queue.push(m_obj)              /// enqueue
             } else {
-                this.last_message = '{' + rest
+                if ( rest[0] === '{' ) { // this is the first message
+                    this.last_message = rest
+                } else {
+                    this.last_message = '{' + rest
+                }
             }
         }
     }
