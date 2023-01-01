@@ -199,6 +199,32 @@ const tls_options = {
 
 ```
 
+##### <u>Further TLS Options</u>
+
+It is possible to load keys long before communicator object creation. In this case, a runtime object may be attached to the tls option of a configuration object. Most of the time configuration objects will be just the JSON configuration object that was loaded from a JSON formatted text file and parsed. But, keys may be added after parsing and prior to the invokation of the constructor. A field name, *preloaded* may be added (optionally) to the *tls* part of the constructor.
+
+```
+// the configuration JSON
+// conf
+let conf = {
+	tls : {
+		"client_key" : "client key pem file",
+		"client_cert" : "client cert file",
+		"server_cert" : "server cert file"
+		"preloadd" : false
+	}
+}
+
+
+conf.tls.preloaded.client_key = load_file_sync(conf.tls.client_key)
+conf.tls.preloaded.client_cert = load_file_sync(conf.tls.client_cert)
+conf.tls.preloaded.server_cert = load_file_sync(conf.tls.server_cert)
+
+let client = new Relayer(conf)
+
+```
+
+
 <a name="oveview-special-events"></a>
 [top of oveview](#top-of-overview)
 ## Special Events
