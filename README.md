@@ -32,7 +32,7 @@ The full definition of the classes is in the section, [Classes](#classes-class)
 
 ### Install
 ```
-npm install message-relay-service
+npm install message-relay-services
 ```
 
 ### Purpose
