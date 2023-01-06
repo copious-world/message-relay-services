@@ -378,20 +378,20 @@ The client class provide just enough to send and receive messages provided its d
 *  **unsubscribe(topic,path)**
 > Stop listening to publications to the topic along the path.
 
-*  **send_on_path(message,path)**
+*  **send\_on\_path(message,path)**
 > Send a message along the path. The **\_m\_path** field will be added.
 > When the message relay service is used, it will pick a relay client (networked through a MessageRelayer) that is configured for the path and send the message through it. These client objects are application specific. But, they use general methods expected by ServeMessageRelay. 
 
-*  **send_op_on_path(message,path,op)**
+*  **send\_op\_on\_path(message,path,op)**
 > Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = op.
 
-*  **set_on_path(message,path)**
+*  **set\_on\_path(message,path)**
 > Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'S'.
 
-*  **get_on_path(message,path)**
+*  **get\_on\_path(message,path)**
 > Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'G'.
 
-*  **del_on_path(message,path)**
+*  **del\_on\_path(message,path)**
 > Send a message along a path with the expectation that an application will process the operation using the message contents. The **\_tx\_op** field is added = 'D'.
 
 
