@@ -14,6 +14,9 @@ const ParentIPCMessenger = require('./lib/parent_ipc_message_relay.js')
 const JSONMessageQueue = require('./json-message-queue')
 const ResponseVector = require('./response-vector')
 //
+const UDPClient = require('./lib/message_relay_udp')
+const UDPEndpoint = require('./lib/message_endpoint_udp')
+//
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 //
@@ -51,6 +54,9 @@ module.exports.IPCChildClientCommunicator = IPCChildClient.Communicator
 
 module.exports.JsonMessageHandlerRelay = ServerMessageRelay.JsonMessageHandlerRelay
 module.exports.EndpointReplier = ServerMessageEndpoint.EndpointReplier
+
+module.exports.UDPClient = UDPClient
+module.exports.UDPEndpoint = UDPEndpoint
 
 
 
