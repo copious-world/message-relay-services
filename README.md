@@ -22,7 +22,9 @@ This javascript package exposes four basic classes, two extension classes, a cla
 7. [**MultiPathRelayClient**](#multipathrelayclient-class)
 8. [**ServerWithIPC**](#serverwithipc-class)
 9. [**IPCClient**](#ipcclient-class)
-10. [**JSONMessageQueue**](#jsonmessagequeue-class)
+10. [**UDPEndpoint**](#udpendpoint-class)
+11. [**UDPClient**](#udpclient-class)
+12. [**JSONMessageQueue**](#jsonmessagequeue-class)
 
 Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
 
