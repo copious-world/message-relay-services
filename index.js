@@ -17,6 +17,7 @@ const ResponseVector = require('./response-vector')
 const UDPClient = require('./lib/message_relay_udp')
 const UDPEndpoint = require('./lib/message_endpoint_udp')
 const MessageRelayContainer = require('./client-producer/cprod')
+const MessageRelayManager = require('./client-producer/cmanager')
 //
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -41,6 +42,7 @@ module.exports.JSONMessageQueue = JSONMessageQueue
 module.exports.ResponseVector = ResponseVector
 //
 module.exports.MessageRelayContainer = MessageRelayContainer
+module.exports.MessageRelayManager = MessageRelayManager
 
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----

@@ -43,6 +43,21 @@ class MessageRelayContainer extends UDPEndpoint {
 
                 conf.tls = msg_obj.tls   // set to use locally configured tls with the requirement that the remove works with permitted keys
                 // no extended tls options
+                // requester cannot send overrides to local client certs
+                if ( conf.tls.preloaded.client_key ) {
+                    delete conf.tls.preloaded.client_key
+                }
+                if ( preloaded.client_cert.client_cert ) {
+                    delete conf.tls.preloaded.client_cert
+                }
+                // if tls is configured locally, then use the local def (not the remote)
+                if ( this.conf.tls.preloaded.client_key ) {
+                    conf.tls.preloaded.client_key = this.conf.tls.preloaded.client_key
+                }
+                if ( this.conf.tls.preloaded.client_cert ) {
+                    conf.tls.preloaded.client_cert = this.conf.tls.preloaded.client_cert
+                }
+
 
                 let ref = new  this._RelayClass(conf,this.wrapper_or_class)
 
