@@ -41,8 +41,6 @@ module.exports.JSONMessageQueue = JSONMessageQueue
 //
 module.exports.ResponseVector = ResponseVector
 //
-module.exports.MessageRelayContainer = MessageRelayContainer
-module.exports.MessageRelayManager = MessageRelayManager
 
 //
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -61,9 +59,19 @@ module.exports.EndpointReplier = ServerMessageEndpoint.EndpointReplier
 
 module.exports.UDPClient = UDPClient
 module.exports.UDPEndpoint = UDPEndpoint
+//
+module.exports.MessageRelayContainer = MessageRelayContainer
+module.exports.MessageRelayManager = MessageRelayManager
+//
 
 
-
+/**
+ * 
+ * @param {object} conf 
+ * @param {object} wrapper 
+ * @param {Function} reporter 
+ * @returns 
+ */
 module.exports.new_client_relay = async (conf,wrapper,reporter) => {
     let relayer = new ClientMessageRelay(conf,wrapper)
     let p = new Promise((resolve,reject) => {
@@ -78,6 +86,13 @@ module.exports.new_client_relay = async (conf,wrapper,reporter) => {
 }
 
 
+/**
+ * 
+ * @param {object} conf 
+ * @param {object} wrapper 
+ * @param {Function} reporter 
+ * @returns 
+ */
 module.exports.new_multi_peer_relay = async (conf,wrapper,reporter) => {
     let relayer = new MultiRelayClient(conf,wrapper)
     let p = new Promise((resolve,reject) => {
@@ -92,6 +107,13 @@ module.exports.new_multi_peer_relay = async (conf,wrapper,reporter) => {
 }
 
 
+/**
+ * 
+ * @param {object} conf 
+ * @param {object} wrapper 
+ * @param {Function} reporter 
+ * @returns 
+ */
 module.exports.new_multi_path_relay = async (conf,wrapper,reporter) => {
     let relayer = new MultiPathRelayClient(conf,wrapper)
     let p = new Promise((resolve,reject) => {
@@ -104,5 +126,3 @@ module.exports.new_multi_path_relay = async (conf,wrapper,reporter) => {
     })
     return p
 }
-
-

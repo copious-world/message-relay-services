@@ -53,30 +53,32 @@ class MessageRelayManager extends UDPEndpoint {
                 if ( connect_info ) {
                     let {conf,connection_op} = connect_info
                     //
+                    let _conf = Object.assign({},conf)
+                    //
                     let addr = msg_obj.address;
                     let port = msg_obj.port
                     //
-                    conf.address = addr
-                    conf.port = port
+                    _conf.address = addr
+                    _conf.port = port
                     //
-                    conf.tls = msg_obj.tls   // set to use locally configured tls with the requirement that the remove works with permitted keys
+                    _conf.tls = msg_obj.tls   // set to use locally configured tls with the requirement that the remove works with permitted keys
                     // no extended tls options
                     // requester cannot send overrides to local client certs
-                    if ( conf.tls.preloaded.client_key ) {
-                        delete conf.tls.preloaded.client_key
+                    if ( _conf.tls && _conf.tls.preloaded && _conf.tls.preloaded.client_key ) {
+                        delete _conf.tls.preloaded.client_key
                     }
-                    if ( preloaded.client_cert.client_cert ) {
-                        delete conf.tls.preloaded.client_cert
+                    if ( _conf.tls && _conf.tls.preloaded && _conf.tls.preloaded.client_cert ) {
+                        delete _conf.tls.preloaded.client_cert
                     }
                     // if tls is configured locally, then use the local def (not the remote)
-                    if ( conf.tls.preloaded.client_key ) {
-                        conf.tls.preloaded.client_key = conf.tls.preloaded.client_key
+                    if ( _conf.tls && _conf.tls.preloaded && conf.tls && conf.tls.preloaded && conf.tls.preloaded.client_key ) {
+                        _conf.tls.preloaded.client_key = conf.tls.preloaded.client_key
                     }
-                    if ( conf.tls.preloaded.client_cert ) {
-                        conf.tls.preloaded.client_cert = conf.tls.preloaded.client_cert
+                    if ( _conf.tls && _conf.tls.preloaded && conf.tls && conf.tls.preloaded && conf.tls.preloaded.client_cert ) {
+                        _conf.tls.preloaded.client_cert = conf.tls.preloaded.client_cert
                     }
                     //
-                    connection_op(conf)             // finish the creation of the connection object
+                    connection_op(_conf)             // finish the creation of the connection object
                 }
 
                 break;
