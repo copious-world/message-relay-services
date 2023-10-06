@@ -1,8 +1,3 @@
-
-
-
-
-
 let MessageRelayUDP = require('../lib/message_relay_udp');
 let ServerUDP = require('../lib/message_endpoint_udp')
 let {MessageRelay,ServeMessageEndpoint} = require('../index')
@@ -22,7 +17,34 @@ async function test1() {
     }
     //
     let mru = new MessageRelayUDP(conf)
-    mru.set_on_path({ "command" : "this is a test" })
+    mru.on('client-ready',async () => {
+        let response = await mru.set_on_path({ "command" : "this is a test" })
+        console.log("TEST 1",response)
+    })
+
+    let mru2 = new MessageRelayUDP(conf)
+    mru2.on('client-ready',async () => {
+        let response = await mru2.set_on_path({ "command" : "this is the SECOND test" })
+        let response2 = await mru.set_on_path({ "command" : "this is THIRD test" })
+        console.log("TEST 2",response)
+        console.log("TEST 3",response2)
+    })
+
+}
+
+
+
+class AppUdpEndpoint extends ServerUDP {
+    //
+    constructor(conf) {
+        super(conf)
+    }
+    //
+    app_message_handler(msg_obj) {
+        console.dir(msg_obj)
+        return { "status" : "OK" }
+    }
+    //
 }
 
 
@@ -33,7 +55,7 @@ async function test2() {
         "port" : 5555
     }
     //
-    let sudp = new ServerUDP(conf)
+    let sudp = new AppUdpEndpoint(conf)
 
     await test1()
 }
@@ -127,14 +149,6 @@ async function mprod_test() {   // this is a test of the connection manager.
 
 
 
-
-
-/*
-let MulticastClient = require('../lib/message_relay_multicast')
-let MulticastEndpoint = require('../lib/message_endpoint_multicast')
-*/
-
-
 async function mcast_test() {   // this is a test of the connection manager.
 
     let conf = {
@@ -182,7 +196,8 @@ async function mcast_test() {   // this is a test of the connection manager.
 
 
 
+//test2()
 
-//test1()
-test2()
+
+cprod_test()
 

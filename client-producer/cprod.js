@@ -106,4 +106,4 @@ class MessageRelayContainer extends UDPEndpoint {
 }
 
 
-module.exports.MessageRelayContainer = MessageRelayContainer
+module.exports = MessageRelayContainer
