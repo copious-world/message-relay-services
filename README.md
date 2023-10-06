@@ -22,11 +22,16 @@ This javascript package exposes four basic classes, two extension classes, a cla
 7. [**MultiPathRelayClient**](#multipathrelayclient-class)
 8. [**ServerWithIPC**](#serverwithipc-class)
 9. [**IPCClient**](#ipcclient-class)
-10. [**UDPEndpoint**](#udpendpoint-class)
-11. [**UDPClient**](#udpclient-class)
-12. [**JSONMessageQueue**](#jsonmessagequeue-class)
-13. [**MessageRelayContainer**](#relaycontainer-class)
-14. [**MessageRelayManager**](#relaymanager-class)
+10. [**UDPClient**](#udpclient-class)
+11. [**UDPEndpoint**](#udpendpoint-class)
+12. [**MulticastClient**](#multicastclient-class)
+13. [**MulticastEndpoint**](#multicastendpoint-class)
+14. [**MessageRelayContainer**](#relaycontainer-class)
+15. [**MessageRelayManager**](#relaymanager-class)
+16. [**JSONMessageQueue**](#jsonmessagequeue-class)
+
+
+
 
 Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
 
@@ -80,6 +85,8 @@ Here is the same list broken down into its subclasses.
 * [**ServeMessageRelay**](#servemessagerelay-class)
 * [**ServeMessageEndpoint**](#servemessageendpoint-class)
 * [**ServerWithIPC**](#serverwithipc-class)
+* [**UDPEndpoint**](#udpendpoint-class)
+* [**MulticastEndpoint**](#multicastendpoint-class)
 
 #### Clients
 
@@ -87,6 +94,8 @@ Here is the same list broken down into its subclasses.
 * [**MultiRelayClient**](#multirelayclient-class)
 * [**MultiPathRelayClient**](#multipathrelayclient-class)
 * [**IPCClient**](#ipcclient-class)
+* [**UDPClient**](#udpclient-class)
+* [**MulticastEndpoint**](#multicastendpoint-class)
 
 #### path relay
 * [**PathHandler**](#pathhandler-class)
@@ -104,6 +113,11 @@ Here is the same list broken down into its subclasses.
 * [**MessengerCommunicator**](#communicator-class)
 * [**MessengerCommunicatorAPI**](#communicator-class)
 
+
+#### Relay Containers and Managers
+
+* [**MessageRelayContainer**](#relaycontainer-class)
+* [**MessageRelayManager**](#relaymanager-class)
 
 <a name="oveview-message"></a>
 [top of oveview](#top-of-overview)
@@ -346,7 +360,14 @@ The definition of class begins here.
 7. [**MultiPathRelayClient**](#multipathrelayclient-class)
 8. [**ServerWithIPC**](#serverwithipc-class)
 9. [**IPCClient**](#ipcclient-class)
-10. [**JSONMessageQueue**](#jsonmessagequeue-class)
+10. [**UDPClient**](#udpclient-class)
+11. [**UDPEndpoint**](#udpendpoint-class)
+12. [**MulticastClient**](#multicastclient-class)
+13. [**MulticastEndpoint**](#multicastendpoint-class)
+14. [**MessageRelayContainer**](#relaycontainer-class)
+15. [**MessageRelayManager**](#relaymanager-class)
+16. [**JSONMessageQueue**](#jsonmessagequeue-class)
+
 
 
 <a name="communicator-class"/></a> [back to top](#top-of-doc)
@@ -755,6 +776,61 @@ Or ... for just a node.js processes:
 ```
 
 The **IPCClient** class assumes that the child process implements **ServerWithIPC**.
+
+
+<a name="udpclient-class"/></a> [back to top](#top-of-doc)
+### 10. **UDPClient**
+
+The **UDPClient** is a subclass of the **MessageRelayer** class. It implements the same logic but use UDP (datagram) connections. 
+
+Optionally, the **UDPClient** can be configured to make connections, 
+ 
+
+<a name="udpendpoint-class"/></a> [back to top](#top-of-doc)
+### 11. **UDPEndpoint**
+
+Tries to remember connections unless it is configured `no_keeps` set to true.
+
+May be set to `use_broadcast`. If this is set, then it will override the EndpointServer `send_to_all` method and broadcast on ports assigned to various topics.
+
+
+
+
+<a name="multicastclient-class"/></a> [back to top](#top-of-doc)
+### 12. **MulticastClient**
+
+The **MulticastClient** is a subclass of the **UDPClient** class. It forms a connection with a some multicast endpoint, **MulticastEndpoint**. The endpoint and the client share (at least in overlap) a table that maps subscription topics to ports. 
+
+This class overrides the communicator class (level) methods, **subscribe** and **unsubscribe**.  These methods manage UDP servers bound to the ports of the topic. The subscribe method has the same parameters as the superclass. However, the methods include logic to deal with multicast messaging on the ports.
+
+The configuration object passed to the constructor must add in two fields,
+`multicast_addr` and `multicast_port_map`.  The multicast 
+
+* subscribe
+* unsubscribe
+
+
+
+<a name="multicastendpoint-class"/></a> [back to top](#top-of-doc)
+### 13. **MulticastEndpoint**
+
+`multicast_port_map`
+
+
+
+<a name="relaycontainer-class"/></a> [back to top](#top-of-doc)
+### 14. **MessageRelayContainer**
+
+
+
+
+
+<a name="relaymanager-class"/></a> [back to top](#top-of-doc)
+### 15. **MessageRelayManager**
+
+
+
+
 
 
 ## Helper Classes
