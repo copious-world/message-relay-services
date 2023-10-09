@@ -29,8 +29,8 @@ This javascript package exposes four basic classes, two extension classes, a cla
 14. [**MessageRelayContainer**](#relaycontainer-class)
 15. [**MessageRelayManager**](#relaymanager-class)
 16. [**JSONMessageQueue**](#jsonmessagequeue-class)
-
-
+17. [**ResponseVector**](#responsevector-class)
+18. [**ResponseVectorTimeout**](#responsevectortimeout-class)
 
 
 Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
@@ -118,6 +118,11 @@ Here is the same list broken down into its subclasses.
 
 * [**MessageRelayContainer**](#relaycontainer-class)
 * [**MessageRelayManager**](#relaymanager-class)
+
+#### Resonse Resolution Managers
+
+* [**ResponseVector**](#responsevector-class)
+* [**ResponseVectorTimeout**](#responsevectortimeout-class)
 
 <a name="oveview-message"></a>
 [top of oveview](#top-of-overview)
@@ -367,8 +372,8 @@ The definition of class begins here.
 14. [**MessageRelayContainer**](#relaycontainer-class)
 15. [**MessageRelayManager**](#relaymanager-class)
 16. [**JSONMessageQueue**](#jsonmessagequeue-class)
-
-
+17. [**ResponseVector**](#responsevector-class)
+18. [**ResponseVectorTimeout**](#responsevectortimeout-class)
 
 <a name="communicator-class"/></a> [back to top](#top-of-doc)
 ### Communicator Class
@@ -783,8 +788,12 @@ The **IPCClient** class assumes that the child process implements **ServerWithIP
 
 The **UDPClient** is a subclass of the **MessageRelayer** class. It implements the same logic but use UDP (datagram) connections. 
 
-Optionally, the **UDPClient** can be configured to make connections, 
- 
+The **UDPClient** can be configured to use ip4 or ip6.
+
+The **UDPClient** sends and makes connections on a best effort basis and does not add logic to account for stream contiguity. Messages sent should be JSON objects small enough in text representation to stay within the limits of UDP packet sizes.
+
+
+
 
 <a name="udpendpoint-class"/></a> [back to top](#top-of-doc)
 ### 11. **UDPEndpoint**
@@ -870,6 +879,47 @@ Here are its methods:
 > Looking at this [msgpack](https://github.com/msgpack) for binary (near binary) transfer of messages.
 
 > It is poissible to do payload nesting from the point of view of custom encoders and decoders.
+
+
+<a name="responsevector-class"/></a> [back to top](#top-of-doc)
+#### ResponseVector
+
+When a message is sent to an endpoint or relayserver for any purpose other than publication, the client may wait for a response. In order to track the response, each message is sent with a `_response_id` field. The class **ResponseVector** manages a map of free response identifiers and maps the response id to the callback function which will release a ***Promise***, for use in the async/await form of calls.
+
+Message sent via publication do not request a response identifier and don't wait for a return message.
+
+The server that receives a message will send a message back via TCP (including TLS) or UDP (sent back to the sender address). The sever will retrieve the response identifier from the client's message and include it in the return message to the client. When the client receives the response, the message handling methods retrieve the resolve handler mapped by the response idenifier, and the ResponseVector releases the response ID.
+
+Applications provide configuration objects to the classes descending from the MessageRelay class. The ResponseVector can be configured to have a max range of response by setting the following variable:
+
+* `conf.max_pending_messages`
+
+> **Default** `max_pending_messages` = 100.
+
+
+***Overriding***: Applications may want to override this class. For example, applications may want to create an ID that is a collision free hash and uses dynamically sized tables. These classes just have to implement the same methods of the **ResponseVector** class, and the new class will have to be mentioned in the configuration of the MessageRelay (or descendant) constructor. Set the following variable in the configuration object:
+
+* `conf.response_vector`
+
+If this configuration field is set, the Communicator class object will create the response vector as follows:
+
+```
+	this.resp_vector = new (require(conf.response_vector)
+```
+
+That is, the configuration variable `response_vector` must be the name of a module loadable by `node.js`.
+
+<a name="responsevectortimeout-class"/></a> [back to top](#top-of-doc)
+#### ResponseVectorTimeout
+
+The **ResponseVectorTimeout** class extends the class **ResponseVector**. It adds an interval timer that checks if messages are awaiting response for too long. If responses take too long to return, the resolver method will be called and the response identifier will be released when the interval passes the expire time for the identifier.
+
+```
+conf.max_message_wait_time
+conf.message_age_check_interval
+```
+
+
 
 
 ## Overriding the Message Queue Class
