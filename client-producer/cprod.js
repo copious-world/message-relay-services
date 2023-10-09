@@ -1,6 +1,3 @@
-
-
-
 const UDPEndpoint = require('../lib/message_endpoint_udp')
 
 // constructor(conf,wrapper) -- MessageRelayer  -- message relay client
@@ -39,7 +36,7 @@ class MessageRelayContainer extends UDPEndpoint {
      * @returns 
      */
     app_message_handler(msg_obj) {
-        let op = msg_obj._op
+        let op = msg_obj._tx_op
         switch ( op ) {
             case 'S' : {
                 //
@@ -73,24 +70,14 @@ class MessageRelayContainer extends UDPEndpoint {
                     conf.tls.preloaded.client_cert = this.conf.tls.preloaded.client_cert
                 }
                 //
+                let self = this
                 let ref = new  this._RelayClass(conf,this.wrapper_or_class)
-                ref.on('client-ready',() => {       // detroy the use of this instance as a server, turn into the class it wraps.
-                    //
-                    this.this.connection.close()
-                    //
-                    let aclass = this._RelayClass
-                    //
-                    const {name,length,prototype,...statics} = Object.getOwnPropertyDescriptors(aclass);
-                    Object.defineProperties(this, statics);
-                    //
-                    const {constructor,...proto} = Object.getOwnPropertyDescriptors(aclass.prototype);
-                    Object.defineProperties(this, proto);
-    
-                    for ( let ky in ref ) {
-                        this[ky] = ref[ky]
-                    }
-                    //
-                })
+                let handler = () => {       // detroy the use of this instance as a server, turn into the class it wraps.
+                    ref.removeListener('client-ready',handler)
+                    this.connection.close()
+                    self.emit('client-ready',ref)
+                }
+                ref.on('client-ready',handler)
                 //
                 break;
             }
@@ -98,8 +85,8 @@ class MessageRelayContainer extends UDPEndpoint {
                 break;
             }
         }
-
-        return("OK")
+        //
+        return { "status" : "OK" }
     }
     
 

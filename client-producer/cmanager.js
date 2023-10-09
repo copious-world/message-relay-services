@@ -38,6 +38,7 @@ class MessageRelayManager extends UDPEndpoint {
 
     /**
      * The remote prompting the connection must know the label for the client that will connect to a server.
+     * `add_waiting_connection` is called by the message relay client `_create_connection`. 
      * 
      * @param {string} connect_label 
      * @param {object} connection -  a message relay class object
@@ -83,7 +84,7 @@ class MessageRelayManager extends UDPEndpoint {
      * @returns 
      */
     app_message_handler(msg_obj) {
-        let op = msg_obj._op
+        let op = msg_obj._tx_op
         switch ( op ) {
             case 'S' : {
                 let label = msg_obj.label
@@ -130,12 +131,12 @@ class MessageRelayManager extends UDPEndpoint {
                 break;
             }
         }
-
-        return("OK")
+        //
+        return { "status" : "OK" }
     }
     
 
 }
 
 
-module.exports.MessageRelayManager = MessageRelayManager
+module.exports = MessageRelayManager
