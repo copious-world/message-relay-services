@@ -71,6 +71,9 @@ class ResponseVectorTimeout {  // there are enough changes that ResponseVector i
 
     unlock_response_id(id) {
         this.waiting_for_response[id] = false
+        if ( this.aging_messages[id] !== undefined ) {
+            delete this.aging_messages[id]
+        }
     }
 
     lock_response_id(id,fn) {

@@ -792,55 +792,140 @@ The **UDPClient** can be configured to use ip4 or ip6.
 
 The **UDPClient** sends and makes connections on a best effort basis and does not add logic to account for stream contiguity. Messages sent should be JSON objects small enough in text representation to stay within the limits of UDP packet sizes.
 
-
-
+By default the **UDPClient** configures itself to use the **ResponseVectorTimeout** class for its response vector. Since it is more likely that a UDP packete may be lost in response, leaving a promise hanging, a timeout is set for each response. Failed responses report an error. For further reference, see the section on [**ResponseVectorTimeout**](#responsevectortimeout-class).
 
 <a name="udpendpoint-class"/></a> [back to top](#top-of-doc)
 ### 11. **UDPEndpoint**
 
-Tries to remember connections unless it is configured `no_keeps` set to true.
+The **UDPEndpoint** descends from the **ServeMessageEndpoint** class. It has much of the same operation, hosting pub/sub and application messages. However, it sets up a UDP server instead of TPC or TLS.
 
-May be set to `use_broadcast`. If this is set, then it will override the EndpointServer `send_to_all` method and broadcast on ports assigned to various topics.
+By default **UDPEndpoint** keeps track of connecting clients, but has configuration options for controlling how it remembers clients. Also, those clients that subscribe can be remembered for a period of time. 
 
+Then, there is broadcast. A class instance may be configured to use broadcast mode when publishing a topic or it may publish to each client by addess sequentially.
 
+The following is a list of fields that may be included to configure instances of this class:
+
+* conf.`time_out_period` -- The amount of time to keep record of a client even if it has not sent a message. If a client sends a new message, this interval starts over.
+* conf.`no_keeps` -- if this is true, the client will remove the record of client after processing a message. This is ignored for subscription and publication.
+* conf.`use_broadcast` -- If true, topic publication will be sent out on the broadcast address. The broadcast goes out on the port configured for the server.
+* conf.`broadcast_address` --  The address for sending broadcast messages.
+
+These configuration fields apply to all message delivery unless a message specifically requests no to have a reply.
+
+When `use_broadcast` is set to true, the **UDPEndpoint** instance will override the EndpointServer `send_to_all` method and broadcast on ports assigned to various topics.
+
+The use of broadcast can be controlled after configuration by two methods: 
+
+*  `set_use_broadcast(bval)` - sets the broadcast mode of the server port and address. Sets an instance variable as well.
+*  `get_use_broadcast`  - returns the state of the instance variable, **true** or **false**
+
+**requesting no response** --
+
+A message can control whether or not a the UDPEndpoint responds if the message contains the field `_no_resp`. If it is included and truthy, the **UDPEndpoint** will not repsond to the message's sender.
+
+All other messages will provide a response indicating that some operation has taken place and perhaps additionally, the response will contain data. For example, 'get' operations return data, but publication operations just report back that publication happened.
 
 
 <a name="multicastclient-class"/></a> [back to top](#top-of-doc)
 ### 12. **MulticastClient**
 
-The **MulticastClient** is a subclass of the **UDPClient** class. It forms a connection with a some multicast endpoint, **MulticastEndpoint**. The endpoint and the client share (at least in overlap) a table that maps subscription topics to ports. 
+The **MulticastClient** is a subclass of the **UDPClient** class. It forms a connection with a multicast endpoint, **MulticastEndpoint**. The endpoint and the client share (at least in overlap) a table that maps subscription topics to ports. 
 
-This class overrides the communicator class (level) methods, **subscribe** and **unsubscribe**.  These methods manage UDP servers bound to the ports of the topic. The subscribe method has the same parameters as the superclass. However, the methods include logic to deal with multicast messaging on the ports.
+This class overrides the communicator class (level) methods, **subscribe** and **unsubscribe**.  These methods manage UDP servers bound to the ports of the topic. The subscribe method has the same parameters as the superclass method. However, the methods include logic to deal with multicast messaging on the ports.
 
 The configuration object passed to the constructor must add in two fields,
-`multicast_addr` and `multicast_port_map`.  The multicast 
+`multicast_addr` and `multicast_port_map`.
 
-* subscribe
-* unsubscribe
+* **subscribe**
 
+Sets up a UDP server that joins the configured multicast address. This server will receive publication messages on the port to which the server is bound. In particular, `multicast_port_map[topic]` references the table that maps topics to UDP ports.
 
+The subscription server acting on behalf of this client receives messages on the mulitcast address which is (to be clear) not the same messaging pathway to which the UPD client is connected or at least expecting message. Instances of this class are clients in the sense that they send their messages on the UPD pathway available for connection.
+
+* **unsubscribe**
+
+This method access the client associated with the topic and path and then drops its multicast membership and then closes off the server using the topic's port.
 
 <a name="multicastendpoint-class"/></a> [back to top](#top-of-doc)
 ### 13. **MulticastEndpoint**
 
-`multicast_port_map`
+The **MulticastEndpoint** class is an extension of the **UDPEndpoint** class. The **MulticastEndpoint** acts in the same way as the **UDPEndpoint** for messages other than pub/sub types of messages. But, for pub/sub messages, the **MulticastEndpoint** implements a topic/port map for pub/sub communication management.
+
+For each topic, the first subscription request causes the **MulticastEndpoint** to create a datagram server and binds it to a port assigned to th topic. Later subscription requests do not try to bind the port again. One the server is bound to the port, the socket is set to use broadcast and the multicast TTL is set to a sizeable number of hops (a constant within the module). This class overrides `add_to_topic(topic,client_name,relayer)` from the **ServeMessageEndpoint** class. 
+
+When a client publishes a message to a topic, the **MulticastEndpoint** broadcasts the message on the port assigned to the topic. It does this by finding the server bound on to the topics' port. **MulticastEndpoint** overrides `send_to_all(topic,msg_obj,ignore,replier)` in order to implement this broadcast. Internally, the following line of code is called to broadcast:
+
+```
+server.send(str_msg, 0, str_msg.length, this.multicast_port_map[topic], this.multicast_addr)
+```
+
+Here, `this.multicast_port_map[topic]` evaluates to the topics port. 
+
+**required configuration:**
+
+The following fields should be supplied via the configuration object:
+
+* conf.`multicast_port_map` - this maps topic to ports.
+* conf.`multicast_addr` - this is a multicast address available to the topic servers
 
 
 
 <a name="relaycontainer-class"/></a> [back to top](#top-of-doc)
 ### 14. **MessageRelayContainer**
 
+The **MessageRelayContainer** is a class that creates a server and waits for a message from a utility that inculdes the IP and PORT of a server for some type of MessageRelay client object to connect to. For instance, **MessageRelayer** could be the class of an object that would like to know the address and port of a server to connect to, but is willing to wait until asn associated UDP service will receive the configuration variable for the connection.
+
+This class implements `app_message_handler(msg_obj)` with code for just the 'S' `_tx_op`. In the 'S' case (the `set_on_path` case), the message relay class (or extension), `app_message_handler` creates the instance for the message relay class instance after altering the configuration with the requested address and port mentioned in the `msg_obj`. The `msg_obj` must have the field `address` and `port` or may have a `paths` object (to be used by the **MultiRelayClient** and/or **MultiPathRelayClient** classes).
 
 
+Utilties delivering messages to a **MessageRelayManager** instance must include certain fields in their messages:
+```
+let addr = msg_obj.address
+let port = msg_obj.port
+let paths = msg_obj.paths // if using a mutlipath or mutlirelay
+```
+
+Once connections are made, the client object will emit **'client-ready'** events which the **MessageRelayContainer** intercepts and then emits its own  **'client-ready'**  event which differs from the client event by the inclusion of a parameter, which the relay client object reference. As such: 
+
+```
+self.emit('client-ready',ref)
+```
+
+In the test code, there is an example that demonstrates the handling of such an event:
+
+```
+relay_proxy.on('client-ready',async (relayc) => {  // this is the response for connecting to the perm server
+    let result = await relayc.set_on_path({ "command" : "this is a test CPROD" },'big-test')
+    console.log(result)
+})
+
+```
+
+The **MessageRelayContainer** stops serving once the it establishes the client connection. That is, this class allows just one client connection to be made.
 
 
 <a name="relaymanager-class"/></a> [back to top](#top-of-doc)
 ### 15. **MessageRelayManager**
 
+The **MessageRelayManager** is similar to the **MessageRelayContainer**, except that it waits be informed of as many servers as server connections that it plans to make. Each **MultiRelayClient** that is configured to use the **MessageRelayManager** will be mapped to a label which will be included in messages from utilties that inform the **MessageRelayManager** of servers.
 
+Utilties delivering messages to a **MessageRelayManager** instance must include certain fields in their messages:
 
+```
+let lable = msg_obj.labels  - identifies the relay client seeking a particular server. 
+let addr = msg_obj.address - same as for MessageRelayContainer
+let port = msg_obj.port
+let paths = msg_obj.paths
+```
 
+The instances of this class, **MessageRelayManager**, do not shutdown after a connection is made. But, they remove the label from a the map that can find the relay client that is waiting for a server to connect to. Hence, the client will connect to one server, the first a utility will apprise it of.
 
+Most likely an application will create one **MessageRelayManager** per process and feed it to all the relay clients (and extensions) that will wait for news about servers. Relay clients using the **MessageRelayManager** will be configured to do so. They will need to have special fields set in their configurations. These fields are the following:
+
+* conf.`_connection_manager ` - a reference to the processes instance fo the **MessageRelayManager** 
+* conf,`_connect_label ` - the label that will be used to associate the client with some server and known to a utility that informs the **MessageRelayManager** instance with message set on the path determined by the application.
+
+Once the relay client is connected, the configuration parameters that it needs for reconnection and other fault mode handling remains set. So, if the relay client needs to reconnect to the server, it will perform in the same manner as if the **MessageRelayManager** had never been used.
 
 ## Helper Classes
 
@@ -915,8 +1000,8 @@ That is, the configuration variable `response_vector` must be the name of a modu
 The **ResponseVectorTimeout** class extends the class **ResponseVector**. It adds an interval timer that checks if messages are awaiting response for too long. If responses take too long to return, the resolver method will be called and the response identifier will be released when the interval passes the expire time for the identifier.
 
 ```
-conf.max_message_wait_time
-conf.message_age_check_interval
+conf.max_message_wait_time -- the time until it is deemed there will be no response 
+conf.message_age_check_interval -- the period of the interval timer for checking timeout
 ```
 
 
@@ -933,6 +1018,8 @@ In other languages than JavaScript, this override might have been done in a diff
 * **JsonMessageHandlerRelay**
 * **EndpointReplier**
 * **JSONMessageQueue**
+
+For enpoint servers in particular, the **EndpointReplier** can be overriden and the `dequeue_messages` method would be left as is. For clients, it would be better to just override **JSONMessageQueue**.
 
 <a name="reserved-field-names" ></a>
 ## Reserved Field Names
