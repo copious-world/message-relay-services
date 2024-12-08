@@ -7,6 +7,8 @@ These classes provide the base classes for managing JSON communication between c
 * **Client classes with common communication methods**
 * **Server classes**: ***application endpoints*** and ***switching relays***
 
+In this version, 0.9.20, support is added for Unix domain sockets by adding to the list of fields that may be used in configuration files. 
+
 <a name="top-of-doc"/></a> 
 
 ## Package Overview
@@ -484,6 +486,22 @@ The *MessageRelayer* **\_response\_id** is generated from a list of free id's st
 }
 ```
 
+Alteratively, the message relay may be configured to use Unix domain sockets: 
+
+```
+{
+    "uds_path" : "./local_socket_name,
+    "files_only" : false,
+    "output_dir" : "fail_over_persistence",
+    "output_file" : "/user_data.json",
+    "max_pending_messages" : false,
+    "file_shunting" : false,
+    "max_reconnect" : 24,
+    "reconnect_wait" : 5,
+    "attempt_reconnect" : true
+}
+```
+
 <a name="servemessagerelay-class"/></a> [back to top](#top-of-doc)  
 [back to classes](#classes-class)
 ### 2. **ServeMessageRelay**
@@ -573,6 +591,36 @@ In the following, the *tls* field calls out various key and cert files.
 
 ```
 
+**NOTE:**
+> if the fields address and port are note specified then default ports will be opened:
+>
+* PORT = 1234
+* HOST = 'localhost'
+
+Unix domain sockets may be included additionally:
+
+```
+{
+    "port" : 5112,
+    "address" : "localhost",
+    "uds_path" : "./local_socket_path",
+    "uds_path_count" : 4,
+    "tls" : {
+    		...
+
+```
+
+
+Similar to and endpoint the relay server will create four paths in the file system, each appended with a '-#' form, e.g.:
+
+*  `./local_socket_path-0`
+*  `./local_socket_path-1`
+*  `./local_socket_path-2`
+*  `./local_socket_path-3`
+
+The additional paths will result in a collection of servers for client connection. The relayers will output to their respective configurations. 
+
+
 <a name="servemessageendpoint-class"/></a> [back to top](#top-of-doc)
 ### 3. **ServeMessageEndpoint**
 
@@ -633,6 +681,40 @@ Each top level field in the object below configures one of two endpoints. The po
     }
  }
 ```
+
+In the case that Unix domain sockets will be used, the application may use one UDS to communicate with a collecton of sockets, or a number of paths may be set up so that clients may each have their own socket. 
+
+For example:
+
+```
+    "user_endpoint" : {
+        "uds_path" : "./local_socket_path",
+        "user_directory" : "./user-assets",
+        "asset_template_dir" : "./user_templates",
+        "all_users" : "users",
+        "record_generator" : ["transitions/dashboard","transitions/profile"]
+    },
+```
+
+Or, there may be more:
+
+```
+    "user_endpoint" : {
+        "uds_path" : "./local_socket_path",
+        "uds_path_count" : 4,
+        "user_directory" : "./user-assets",
+        "asset_template_dir" : "./user_templates",
+        "all_users" : "users",
+        "record_generator" : ["transitions/dashboard","transitions/profile"]
+    },
+```
+
+The endpoint will create four paths in the file system, each appended with a '-#' form, e.g.:
+
+*  `./local_socket_path-0`
+*  `./local_socket_path-1`
+*  `./local_socket_path-2`
+*  `./local_socket_path-3`
 
 
 <a name="pathhandler-class"/></a> [back to top](#top-of-doc)

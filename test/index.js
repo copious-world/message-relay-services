@@ -25,7 +25,6 @@ test('json message queue: create class', t => {
     t.fail("no class instance")
 })
 
-
 test('json message queue: default parser is JSON.parse', t => {
     let mod = new JSONMessageQueue(false)
     if ( mod ) {
@@ -660,6 +659,7 @@ test("MessageRelayClient - files", async t => {
         write(msg) {
             console.log("testSock." + "write ..." + msg)
             call_results[this.test_name] = JSON.parse(msg)
+            this.emit('test-call-results-ok')
         }
 
         end() {}
@@ -695,19 +695,22 @@ test("MessageRelayClient - files", async t => {
     let relayer = new test_RC(conf)
     await relayer._start_file_shunting(conf)
 
+    let hold_promises = []
+    relayer.socket.on('test-call-results-ok',async () => {
+        await relayer._shutdown_files_going(hold_promises,true)
+
+        let resp_id = call_results["wiggly-pigly"]._response_id
+        message = {
+            "_response_id" : resp_id
+        }    
+    })
+
     let message = {
         "you" : "are 2",
         "here" : true
     }
     await relayer.send_on_path(message,"twisty")
 
-    let hold_promises = []
-    await relayer._shutdown_files_going(hold_promises,true)
-
-    let resp_id = call_results["wiggly-pigly"]._response_id
-    message = {
-        "_response_id" : resp_id
-    }
 
     let p2 = new Promise((resolve,reject) => {
         setImmediate(() => {
@@ -1115,6 +1118,114 @@ test('Connecting class intialization', async t => {
             super(conf)
         }
 
+        /**
+         * 
+         * @returns {object}
+         */
+        _load_tls_keys() {
+            //
+            let base = process.cwd()
+            //
+            // allow exceptions to be thrown
+            if ( this.tls_conf ) {
+                // //
+                // let server_key = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.server_key ) {
+                //     server_key = this.tls_conf.preloaded.server_key
+                // } else {
+                //     server_key = fs.readFileSync(`${base}/${this.tls_conf.server_key}`)
+                // }
+                // //
+                // let server_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.server_cert ) {
+                //     server_cert = this.tls_conf.preloaded.server_cert
+                // } else {
+                //     server_cert = fs.readFileSync(`${base}/${this.tls_conf.server_cert}`)
+                // }
+                // //
+                // let client_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.client_cert ) {
+                //     client_cert = this.tls_conf.preloaded.client_cert
+                // } else {
+                //     client_cert = fs.readFileSync(`${base}/${this.tls_conf.client_cert}`)
+                // }
+
+                let tls_options = {
+                    key: "server_key",
+                    cert: "client_cert",
+                    requestCert: true,
+                    ca: [ "client_cert" ]
+                };
+
+                return tls_options
+            }
+            //
+            return false
+        }
+
+
+
+
+        /**
+         * 
+         */
+        _create_connection() {
+            if ( (this.UDS_path !== undefined) || (this.uds_path_count == 0) ) {
+                if ( !(this.use_tls) ) {
+                    //this.connection = net.createServer((sock) => { this.onClientConnected_func(sock) })
+                } else {
+                    if ( this.default_tls ) {
+                        //this.connection = tls.createServer((sock) => { this.onClientConnected_func(sock) });
+                    } else {
+                        const options = this.preloaded_tls_keys;
+                        if ( this.extended_tls_options !== false ) {
+                            options = Object.assign({},options,this.extended_tls_options)
+                        }
+                        //this.connection = tls.createServer(options,((sock) => { this.onClientConnected_func(sock) }));    
+                    }
+                }
+            } else {
+                for ( let i = 0; i < this.uds_path_count; i++ ) {
+                    let uds_path = `${this.UDS_path}-$[i]`
+                    if ( !(this.use_tls) ) {
+                        //this.connection = net.createServer((sock) => { this.onClientConnected_func(sock,uds_path) })
+                    } else {
+                        if ( this.default_tls ) {
+                            //this.connection = tls.createServer((sock) => { this.onClientConnected_func(sock,uds_path) });
+                        } else {
+                            const options = this.preloaded_tls_keys;
+                            if ( this.extended_tls_options !== false ) {
+                                options = Object.assign({},options,this.extended_tls_options)
+                            }
+                            //this.connection = tls.createServer(options,((sock) => { this.onClientConnected_func(sock,uds_path) }));    
+                        }
+                    }
+                }
+                this.uds_server_list[uds_path] = this.connection
+            }
+            //   UDS 
+            if ( this.UDS_path !== undefined ) {
+                if ( this.uds_path_count == 0 ) {
+                    // this.connection.listen({ 'path' : this.UDS_path }, () => {
+                    //     console.log(`Server started at: ${this.UDS_path}`);
+                    // });
+                } else {
+                    for ( let i = 0; i < this.uds_path_count; i++ ) {
+                        let uds_path = `${this.UDS_path}-$[i]`
+                        let connection = this.uds_server_list[uds_path]
+                        // connection.listen({ 'path' : uds_path }, () => {
+                        //     console.log(`Server started at: ${uds_path}`);
+                        // });    
+                    }
+                }
+            } else {
+                // this.connection.listen(this.port, this.address, () => {
+                //     console.log(`Server started at: ${this.address}:${this.port}`);
+                // });    
+            }
+
+        }
+
         _create_connection() {
             if ( !(this.use_tls) ) {
                 //this.connection = net.createServer((sock) => { this.onClientConnected_func(sock) })
@@ -1142,6 +1253,56 @@ test('Connecting class intialization', async t => {
         constructor(conf) {
             super(conf)
         }
+
+    
+        /**
+         * 
+         * @returns {object}
+         */
+        _load_tls_keys() {
+            //
+            let base = process.cwd()
+            //
+            // allow exceptions to be thrown
+            if ( this.tls_conf ) {
+                // //
+                // let server_key = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.server_key ) {
+                //     server_key = this.tls_conf.preloaded.server_key
+                // } else {
+                //     server_key = fs.readFileSync(`${base}/${this.tls_conf.server_key}`)
+                // }
+                // //
+                // let server_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.server_cert ) {
+                //     server_cert = this.tls_conf.preloaded.server_cert
+                // } else {
+                //     server_cert = fs.readFileSync(`${base}/${this.tls_conf.server_cert}`)
+                // }
+                // //
+                // let client_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.client_cert ) {
+                //     client_cert = this.tls_conf.preloaded.client_cert
+                // } else {
+                //     client_cert = fs.readFileSync(`${base}/${this.tls_conf.client_cert}`)
+                // }
+
+                let tls_options = {
+                    key: "server_key",
+                    cert: "client_cert",
+                    requestCert: true,
+                    ca: [ "client_cert" ]
+                };
+
+                return tls_options
+            }
+            //
+            return false
+        }
+
+
+
+
         _create_connection() {
             if ( !(this.use_tls) ) {
                 this.net_con = "simples server" //  net.createServer(this.onClientConnected_func);
@@ -1173,6 +1334,67 @@ test('Connecting class intialization', async t => {
         }
 
         _setup_connection_handlers(client,conf) {}
+
+
+
+        /**
+         * 
+         * @returns {object} - tls options use in the call to `connect`
+         */
+        _load_tls_keys() {
+            //
+            let base = process.cwd()
+            //
+            // allow exceptions to be thrown
+            if ( this.tls_conf ) {
+                // //
+                // let client_key = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.client_key ) {
+                //     client_key = this.tls_conf.preloaded.client_key
+                // } else {
+                //     client_key = fs.readFileSync(`${base}/${this.tls_conf.client_key}`)
+                // }
+                // //
+                // let client_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.client_cert ) {
+                //     client_cert = this.tls_conf.preloaded.client_cert
+                // } else {
+                //     client_cert = fs.readFileSync(`${base}/${this.tls_conf.client_cert}`)
+                // }
+                // //
+                // let server_cert = false
+                // if ( this.tls_conf.preloaded && this.tls_conf.preloaded.server_cert ) {
+                //     server_cert = this.tls_conf.preloaded.server_cert
+                // } else {
+                //     if ( Array.isArray(this.tls_conf.server_cert) ) {
+                //         server_cert = []
+                //         for ( let cert_file of this.tls_conf.server_cert ) {
+                //             let one_cert = fs.readFileSync(`${base}/${cert_file}`)
+                //             server_cert.push(one_cert)
+                //         }
+                //     } else {
+                //         server_cert = fs.readFileSync(`${base}/${this.tls_conf.server_cert}`)
+                //     }
+                // }
+
+                let server_cert = false
+
+                let tls_options = {
+                    // Necessary only if the server requires client certificate authentication.
+                    key: "client_key",
+                    cert: "client_cert",
+                    // Necessary only if the server uses a self-signed certificate.
+                    ca: Array.isArray(server_cert) ? server_cert :  [ "server_cert" ],
+                    // Necessary only if the server's cert isn't for "localhost".
+                    checkServerIdentity: () => { return null; },
+                };
+        
+                return tls_options
+            }
+            //
+            return false
+        }
+
 
         _create_connection() {
             if ( !(this.use_tls) ) {
@@ -1314,5 +1536,87 @@ test('Connecting class intialization', async t => {
     t.is(mrc_tls.tls_conf.server_cert,"A file name")
     t.is(mrc_tls.tls_conf.client_cert,"A file name")
     t.is(mrc_tls.use_tls,true)
+
+})
+
+
+
+
+
+test('Message via Unix domain sockets -- configuration special', async t => {
+
+
+    class UDSEndpoint extends MessageEndpoint {
+        constructor(conf) {
+            super(conf)
+        }
+
+        app_message_handler(msg_obj) {
+            console.log("UDS ENDPOINT!!")
+            console.dir(msg_obj)
+            return({ "status" : "OK" })
+        }
+    }
+
+
+    class UDSMEssenger extends MessageRelayClient {
+        constructor(conf) {
+console.log("BEFORE MessageRelayClient CONSCTRUCTOR")
+            super(conf)
+console.log("UDS MESSENGR CONSCTRUCTOR")
+        }
+
+    }
+
+
+    let test_path = `${__dirname}/my_test_pipe`
+    let conf = {
+        "uds_path" : test_path,
+        "uds_path_count" : 0
+
+    }
+    let epoint = new UDSEndpoint(conf)
+
+    let p = new Promise((resolve,reject) => {
+        epoint.on('SERVER-READY_test',async () => {
+
+            console.log("RECEIVED SERVER READY")
+    
+            let messngr = new UDSMEssenger(conf)
+
+            messngr.on('client-ready',async (pipe,should_be_UDS) => {
+                //
+                console.log(`CAN SEND MESSAGES ON  ${should_be_UDS} pipe ${pipe}`)
+                //
+                console.log("Sending messages UDS TEST")
+                //
+                await messngr.send_op_on_path({
+                    "data" : "this is the message",
+                    "client" : "client 1"
+                },"tests-uds","W");
+                //
+                let response = await messngr.send_op_on_path({
+                    "data" : "this is the second message",
+                    "client" : "client 1"
+                },"tests-uds","W");
+
+console.dir(response)
+                //
+console.log("closing client")
+                messngr.closeAll();
+console.log("closing server")
+                epoint.closeAll();
+                resolve(true)
+                //
+            })
+        })
+    })
+
+    try {
+        await p;
+        t.pass("handlers ran")
+    } catch (e) {
+        t.fail("handler promeise error caught")
+    }
 
 })

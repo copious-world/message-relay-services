@@ -196,7 +196,7 @@ class PeerPublishingHandler extends PathHandler {
 
 
 class OutgoingEmailHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
+    constructor(path,conf,FanoutRelayerClass) {
         super(EMAIL_PATH,conf,FanoutRelayerClass)
     }
     //
@@ -210,7 +210,7 @@ class OutgoingEmailHandler extends PathHandler {
 
 
 class ContactHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
+    constructor(path,conf,FanoutRelayerClass) {
         super(CONTACT_PATH,conf,FanoutRelayerClass)
     }
     //
@@ -225,7 +225,7 @@ class ContactHandler extends PathHandler {
 
 
 class UserHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
+    constructor(path,conf,FanoutRelayerClass) {
         super(USER_PATH,conf,FanoutRelayerClass)
     }
     //
@@ -240,7 +240,7 @@ class UserHandler extends PathHandler {
 
 
 class PersistenceHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
+    constructor(path,conf,FanoutRelayerClass) {
         super(PERSISTENCE_PATH,conf,FanoutRelayerClass)
     }
     //
@@ -258,7 +258,7 @@ class PersistenceHandler extends PathHandler {
 
 
 class NotificationHandler extends PathHandler {
-    constructor(conf,FanoutRelayerClass) {
+    constructor(path,conf,FanoutRelayerClass) {
         super(NOTIFICATION_PATH,conf,FanoutRelayerClass)
     }
     //
