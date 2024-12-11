@@ -9,6 +9,7 @@ const EMAIL_PATH = 'outgo_email'        // app email -- likely to a spool file o
 const CONTACT_PATH = 'contact'          // intake spool similar to email or same with proper interface
 const NOTIFICATION_PATH = 'notify'      // admin or user to user (should be a special endpoint)
 const PEER_PUBLISHER = 'peer_publish'
+const APPLICATION_ENDPOINT = 'app_endpoint'
 // ---- ---- ---- ---- ---- ---- ---- ----
 const g_path_impls = {
     'outgo_email' : null,
@@ -194,6 +195,46 @@ class PeerPublishingHandler extends PathHandler {
 }
 
 
+class ApplicationEndpointHandler extends PeerPublishingHandler {
+
+    constructor(path,conf,FanoutRelayerClass) {
+        path = ((typeof path === 'string') ? path : APPLICATION_ENDPOINT)
+        super(path,conf,FanoutRelayerClass)
+        this.all_topic_subscribers = {}
+    }
+
+    // ----  ---- ---- ---- ---- ---- ----
+
+    async send(message) {       // no _tx_op thereby handling 'P', 'S', and others such as 'U'... which write for particular purposes
+        let op_message = Object.assign({},message)
+        msg_obj._tx_op = 'S'
+        let response = await this.app_message_handler(op_message)
+        return response
+    }
+
+    async get(message) {
+        let op_message = Object.assign({},message)
+        op_message._tx_op = 'G'
+        let response = await this.app_message_handler(op_message)
+        return response
+    }
+
+    async del(message) {
+        let op_message = Object.assign({},message)
+        op_message._tx_op = 'D'
+        let response = await this.app_message_handler(op_message)
+        return response
+    }
+
+
+    //
+    async app_message_handler(msg_obj) {
+        this.id_augmentation(msg_obj)
+        return { "status" : "OK", "explain" : `${msg_obj._tx_op} performed`, "when" : Date.now() }
+    }
+
+}
+
 
 class OutgoingEmailHandler extends PathHandler {
     constructor(path,conf,FanoutRelayerClass) {
@@ -282,6 +323,7 @@ g_path_classes[EMAIL_PATH] = OutgoingEmailHandler
 g_path_classes[CONTACT_PATH] = ContactHandler
 g_path_classes[NOTIFICATION_PATH] = NotificationHandler
 g_path_classes[PEER_PUBLISHER] = PeerPublishingHandler
+g_path_classes[APPLICATION_ENDPOINT] = ApplicationEndpointHandler
 
 function Path_handler_factory(path,path_conf,FanoutRelayerClass) {
     let PathClass = g_path_classes[path]
@@ -309,3 +351,5 @@ module.exports.NOTIFICATION_PATH = NOTIFICATION_PATH
 module.exports.classes = g_path_classes     // applications may want to override the class implementations given here.
 module.exports.PathHandler = PathHandler
 module.exports.PeerPublishingHandler = PeerPublishingHandler
+module.exports.ApplicationEndpointHandler = ApplicationEndpointHandler
+
