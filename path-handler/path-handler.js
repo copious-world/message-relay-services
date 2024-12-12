@@ -207,30 +207,27 @@ class ApplicationEndpointHandler extends PeerPublishingHandler {
 
     async send(message) {       // no _tx_op thereby handling 'P', 'S', and others such as 'U'... which write for particular purposes
         let op_message = Object.assign({},message)
-        msg_obj._tx_op = 'S'
-        let response = await this.app_message_handler(op_message)
+        let response = await this.app_message_handler('S',op_message)
         return response
     }
 
     async get(message) {
         let op_message = Object.assign({},message)
-        op_message._tx_op = 'G'
-        let response = await this.app_message_handler(op_message)
+        let response = await this.app_message_handler('G',op_message)
         return response
     }
 
     async del(message) {
         let op_message = Object.assign({},message)
-        op_message._tx_op = 'D'
-        let response = await this.app_message_handler(op_message)
+        let response = await this.app_message_handler('D',op_message)
         return response
     }
 
 
     //
-    async app_message_handler(msg_obj) {
+    async app_message_handler(op,msg_obj) {
         this.id_augmentation(msg_obj)
-        return { "status" : "OK", "explain" : `${msg_obj._tx_op} performed`, "when" : Date.now() }
+        return { "status" : "OK", "explain" : `${op} performed`, "when" : Date.now() }
     }
 
 }

@@ -536,7 +536,6 @@ In the following, the *tls* field calls out various key and cert files.
     	"server_cert" : "my_server_cert.pem",
     	"client_cert" : "my_client_cert.pem"
     },
-    "path_types" : ["outgo_email","contact","user","persistence"],
     "path_handler_factory" : "MyAppPathHandler",
     "path_types" : {
         "outgo_email" : {
