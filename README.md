@@ -20,19 +20,24 @@ This javascript package exposes four basic classes, two extension classes, a cla
 3. [**ServeMessageEndpoint**](#servemessageendpoint-class)
 4. [**PathHandler**](#pathhandler-class)
 5. [**PeerPublishingHandler**](#peerpublishinghandler-class)
-6. [**MultiRelayClient**](#multirelayclient-class)
-7. [**MultiPathRelayClient**](#multipathrelayclient-class)
-8. [**ServerWithIPC**](#serverwithipc-class)
-9. [**IPCClient**](#ipcclient-class)
-10. [**UDPClient**](#udpclient-class)
-11. [**UDPEndpoint**](#udpendpoint-class)
-12. [**MulticastClient**](#multicastclient-class)
-13. [**MulticastEndpoint**](#multicastendpoint-class)
-14. [**MessageRelayContainer**](#relaycontainer-class)
-15. [**MessageRelayManager**](#relaymanager-class)
-16. [**JSONMessageQueue**](#jsonmessagequeue-class)
-17. [**ResponseVector**](#responsevector-class)
-18. [**ResponseVectorTimeout**](#responsevectortimeout-class)
+6. [**ApplicationEndpointHandler**](#applicationhandler-class)
+7. [**MultiRelayClient**](#multirelayclient-class)
+8. [**MultiPathRelayClient**](#multipathrelayclient-class)
+9. [**ServerWithIPC**](#serverwithipc-class)
+10. [**IPCClient**](#ipcclient-class)
+11. [**UDPClient**](#udpclient-class)
+12. [**UDPEndpoint**](#udpendpoint-class)
+13. [**MulticastClient**](#multicastclient-class)
+14. [**MulticastEndpoint**](#multicastendpoint-class)
+15. [**MessageRelayContainer**](#relaycontainer-class)
+16. [**MessageRelayManager**](#relaymanager-class)
+
+--
+[**Helper Classes**](#helper-classes)
+
+1. [**JSONMessageQueue**](#jsonmessagequeue-class)
+2. [**ResponseVector**](#responsevector-class)
+3. [**ResponseVectorTimeout**](#responsevectortimeout-class)
 
 
 Most of the time, applications should override these classes and create instance methods. Occasionally, the client classes only need special configuration. The server classes will need to be overridden more often. Examples will be given. Other classes, outlined below, which help customization are exposed as well. 
@@ -102,6 +107,7 @@ Here is the same list broken down into its subclasses.
 #### path relay
 * [**PathHandler**](#pathhandler-class)
 * [**PeerPublishingHandler**](#peerpublishinghandler-class)
+* [**ApplicationEndpointHandler**](#applicationhandler-class)
 
 #### message buffering and parsing
 
@@ -363,19 +369,24 @@ The definition of class begins here.
 3. [**ServeMessageEndpoint**](#servemessageendpoint-class)
 4. [**PathHandler**](#pathhandler-class)
 5. [**PeerPublishingHandler**](#peerpublishinghandler-class)
-6. [**MultiRelayClient**](#multirelayclient-class)
-7. [**MultiPathRelayClient**](#multipathrelayclient-class)
-8. [**ServerWithIPC**](#serverwithipc-class)
-9. [**IPCClient**](#ipcclient-class)
-10. [**UDPClient**](#udpclient-class)
-11. [**UDPEndpoint**](#udpendpoint-class)
-12. [**MulticastClient**](#multicastclient-class)
-13. [**MulticastEndpoint**](#multicastendpoint-class)
-14. [**MessageRelayContainer**](#relaycontainer-class)
-15. [**MessageRelayManager**](#relaymanager-class)
-16. [**JSONMessageQueue**](#jsonmessagequeue-class)
-17. [**ResponseVector**](#responsevector-class)
-18. [**ResponseVectorTimeout**](#responsevectortimeout-class)
+6. [**ApplicationEndpointHandler**](#applicationhandler-class)
+7. [**MultiRelayClient**](#multirelayclient-class)
+8. [**MultiPathRelayClient**](#multipathrelayclient-class)
+9. [**ServerWithIPC**](#serverwithipc-class)
+10. [**IPCClient**](#ipcclient-class)
+11. [**UDPClient**](#udpclient-class)
+12. [**UDPEndpoint**](#udpendpoint-class)
+13. [**MulticastClient**](#multicastclient-class)
+14. [**MulticastEndpoint**](#multicastendpoint-class)
+15. [**MessageRelayContainer**](#relaycontainer-class)
+16. [**MessageRelayManager**](#relaymanager-class)
+
+--
+**Helper Classes**
+
+1. [**JSONMessageQueue**](#jsonmessagequeue-class)
+2. [**ResponseVector**](#responsevector-class)
+3. [**ResponseVectorTimeout**](#responsevectortimeout-class)
 
 <a name="communicator-class"/></a> [back to top](#top-of-doc)
 ### Communicator Class
@@ -745,10 +756,24 @@ The *ServeMessageRelay* makes use of the following methods when calling a *PathH
 <a name="peerpublishinghandler-class"/></a> [back to top](#top-of-doc)
 ### 5. **PeerPublishingHandler**
 
+This class handles publications and subscriptions among peers connected to the same message relay service. So, while the path handler will act as a proxy for publications downstream, this path handler sends publications out laterally. In this way, the message relay server can act as a standalone pub/sub server without relying on endpoint servers to which the path handler is a client.
+
+<a name="applicationhandler-class"/></a> [back to top](#top-of-doc)
+### 6. **ApplicationEndpointHandler**
+
+The application handler version of a path handler does not forward messages to a connection, instead it drops the messages into methods, which should be overridden by the application.
+
+The descendant class should provide the following method:
+
+* `app_message_handler(op,op_message)`
+
+> Here, `op` is one of three characters, 'S', 'G', and 'D', where 'S', 'G', and 'D' stand for *set*, *get*, *delete* respectively.
+
+The application may operate in any safe way that it chooses, taking most of its operation parameter from `op_message`. `app_message_handler(op,op_message)` returns a response which is returned to the calling connection.
 
 
 <a name="multirelayclient-class"/></a> [back to top](#top-of-doc)
-### 6. **MultiRelayClient**
+### 7. **MultiRelayClient**
 
 This class wraps around a list of *RelayClient* and exposes methods of the same name as those in *RelayClient*. The only difference is, a *MultiRelayClient* instance will pick a peer connection according to a schedule to send the message to. It is assumed that the endpoints at the ends of the relay are perform the same or similar and mutually beneficial services as their counterparts.
 
@@ -786,7 +811,7 @@ The *MultiRelayClient* configures each instance of a *MessageRelayer* the same. 
 
 
 <a name="multipathrelayclient-class"/></a> [back to top](#top-of-doc)
-### 7. **MultiPathRelayClient**
+### 8. **MultiPathRelayClient**
 
 This class wraps around a map of *RelayClient*, path to *RelayClient*. The class exposes methods of the same name as those in *RelayClient*, but the certain methods add a path parameter.
 
@@ -830,12 +855,12 @@ The * MultiPathRelayClient* configures each instance of a *MessageRelayer* accor
 
 
 <a name="serverwithipc-class"/></a> [back to top](#top-of-doc)
-### 8. **ServerWithIPC**
+### 9. **ServerWithIPC**
 
 The **ServerWithIPC** is subclass of the endpoint server. It does almost everything the same as an endpoint server. But, it extends the class initialization in order to set up a message handler for messages comming from its parent process. Also, it replaces the definition of the **writer** class with that of a **ProcWriter**. The **ProcWriter** has a *write* method that sends messages to the parent process.
 
 <a name="ipcclient-class"/></a> [back to top](#top-of-doc)
-### 9. **IPCClient**
+### 10. **IPCClient**
 
 The  **IPCClient** is a subclass of the common communicator class. Once messages are injested by this client, it operates the same as the other message relay classes which descend from the common communicator.
 
@@ -865,7 +890,7 @@ The **IPCClient** class assumes that the child process implements **ServerWithIP
 
 
 <a name="udpclient-class"/></a> [back to top](#top-of-doc)
-### 10. **UDPClient**
+### 11. **UDPClient**
 
 The **UDPClient** is a subclass of the **MessageRelayer** class. It implements the same logic but use UDP (datagram) connections. 
 
@@ -876,7 +901,7 @@ The **UDPClient** sends and makes connections on a best effort basis and does no
 By default the **UDPClient** configures itself to use the **ResponseVectorTimeout** class for its response vector. Since it is more likely that a UDP packete may be lost in response, leaving a promise hanging, a timeout is set for each response. Failed responses report an error. For further reference, see the section on [**ResponseVectorTimeout**](#responsevectortimeout-class).
 
 <a name="udpendpoint-class"/></a> [back to top](#top-of-doc)
-### 11. **UDPEndpoint**
+### 12. **UDPEndpoint**
 
 The **UDPEndpoint** descends from the **ServeMessageEndpoint** class. It has much of the same operation, hosting pub/sub and application messages. However, it sets up a UDP server instead of TPC or TLS.
 
@@ -908,7 +933,7 @@ All other messages will provide a response indicating that some operation has ta
 
 
 <a name="multicastclient-class"/></a> [back to top](#top-of-doc)
-### 12. **MulticastClient**
+### 13. **MulticastClient**
 
 The **MulticastClient** is a subclass of the **UDPClient** class. It forms a connection with a multicast endpoint, **MulticastEndpoint**. The endpoint and the client share (at least in overlap) a table that maps subscription topics to ports. 
 
@@ -928,7 +953,7 @@ The subscription server acting on behalf of this client receives messages on the
 This method access the client associated with the topic and path and then drops its multicast membership and then closes off the server using the topic's port.
 
 <a name="multicastendpoint-class"/></a> [back to top](#top-of-doc)
-### 13. **MulticastEndpoint**
+### 14. **MulticastEndpoint**
 
 The **MulticastEndpoint** class is an extension of the **UDPEndpoint** class. The **MulticastEndpoint** acts in the same way as the **UDPEndpoint** for messages other than pub/sub types of messages. But, for pub/sub messages, the **MulticastEndpoint** implements a topic/port map for pub/sub communication management.
 
@@ -952,7 +977,7 @@ The following fields should be supplied via the configuration object:
 
 
 <a name="relaycontainer-class"/></a> [back to top](#top-of-doc)
-### 14. **MessageRelayContainer**
+### 15. **MessageRelayContainer**
 
 The **MessageRelayContainer** is a class that creates a server and waits for a message from a utility that inculdes the IP and PORT of a server for some type of MessageRelay client object to connect to. For instance, **MessageRelayer** could be the class of an object that would like to know the address and port of a server to connect to, but is willing to wait until asn associated UDP service will receive the configuration variable for the connection.
 
@@ -986,7 +1011,7 @@ The **MessageRelayContainer** stops serving once the it establishes the client c
 
 
 <a name="relaymanager-class"/></a> [back to top](#top-of-doc)
-### 15. **MessageRelayManager**
+### 16. **MessageRelayManager**
 
 The **MessageRelayManager** is similar to the **MessageRelayContainer**, except that it waits be informed of as many servers as server connections that it plans to make. Each **MultiRelayClient** that is configured to use the **MessageRelayManager** will be mapped to a label which will be included in messages from utilties that inform the **MessageRelayManager** of servers.
 
@@ -1008,10 +1033,13 @@ Most likely an application will create one **MessageRelayManager** per process a
 
 Once the relay client is connected, the configuration parameters that it needs for reconnection and other fault mode handling remains set. So, if the relay client needs to reconnect to the server, it will perform in the same manner as if the **MessageRelayManager** had never been used.
 
+
+
+<a name="helper-classes"/></a> [back to top](#top-of-doc)
 ## Helper Classes
 
 <a name="jsonmessagequeue-class"/></a> [back to top](#top-of-doc)
-#### JSONMessageQueue
+### H-1. JSONMessageQueue
 > This class takes in the data buffers delivered by the data handlers listening on sockets. It parses the stream into strings encoding objects, a string per object. It converts each encoding string into JavaScript objects and enqueues them. It maintains a simple queue of objects and provides the *dequeue* method for classes that use it.
 
 Here are its methods:
@@ -1048,7 +1076,7 @@ Here are its methods:
 
 
 <a name="responsevector-class"/></a> [back to top](#top-of-doc)
-#### ResponseVector
+### H-2. ResponseVector
 
 When a message is sent to an endpoint or relayserver for any purpose other than publication, the client may wait for a response. In order to track the response, each message is sent with a `_response_id` field. The class **ResponseVector** manages a map of free response identifiers and maps the response id to the callback function which will release a ***Promise***, for use in the async/await form of calls.
 
@@ -1076,7 +1104,7 @@ If this configuration field is set, the Communicator class object will create th
 That is, the configuration variable `response_vector` must be the name of a module loadable by `node.js`.
 
 <a name="responsevectortimeout-class"/></a> [back to top](#top-of-doc)
-#### ResponseVectorTimeout
+### H-2. ResponseVectorTimeout
 
 The **ResponseVectorTimeout** class extends the class **ResponseVector**. It adds an interval timer that checks if messages are awaiting response for too long. If responses take too long to return, the resolver method will be called and the response identifier will be released when the interval passes the expire time for the identifier.
 
