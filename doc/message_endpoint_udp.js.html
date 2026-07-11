@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>message_endpoint_udp.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Overview</a></h2><h2><a href="https://github.com/copious-world/message-relay-services" target="_blank" class="menu-item" id="repository" >Github repo</a></h2><h2><a href="https://www.npmjs.com/package/message-relay-services" target="_blank" class="menu-item" id="package" >Npm package</a></h2><h3>Classes</h3>
+                        <ul id="classes-ul-overflow" class="menu-contained-nav" ><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Client.html#_attempt_reconnect">_attempt_reconnect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_configure_reconnect">_configure_reconnect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connect">_connect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connect">_connect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connection_handler">_connection_handler</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connection_handler">_connection_handler</a></li><li data-type='method' style='display: none;'><a href="Client.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Client.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Client.html#_load_tls_keys">_load_tls_keys</a></li><li data-type='method' style='display: none;'><a href="Client.html#_setup_connection_handlers">_setup_connection_handlers</a></li><li data-type='method' style='display: none;'><a href="Client.html#_setup_connection_handlers">_setup_connection_handlers</a></li><li data-type='method' style='display: none;'><a href="Client.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="Client.html#unsubscribe">unsubscribe</a></li></ul></li><li></li><li></li><li><a href="Communicator.html">Communicator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Communicator.html#_handle_unsolicited">_handle_unsolicited</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_message_and_response">_message_and_response</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_connection">add_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_connection">add_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_data_and_react">add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_data_and_react">add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_object_and_react">add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_object_and_react">add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_to_topic">add_to_topic</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_message_handler">app_message_handler</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_post_start_subscription">app_post_start_subscription</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publication_pre_fan_response">app_publication_pre_fan_response</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publish">app_publish</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publish_on_path">app_publish_on_path</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_subscription_handler">app_subscription_handler</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#client_add_data_and_react">client_add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#client_add_object_and_react">client_add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#close">close</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#has_connection">has_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_connection">remove_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_from_all_topics">remove_from_all_topics</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_from_topics">remove_from_topics</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#sendMessage">sendMessage</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_all">send_to_all</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_one">send_to_one</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_subset">send_to_subset</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#unkown_topic">unkown_topic</a></li></ul></li><li></li><li><a href="CommunicatorAPI.html">CommunicatorAPI</a><ul class='methods'><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#mod_on_path">mod_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publish_path_default">publish_path_default</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send">send</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#subscribe_path_default">subscribe_path_default</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#unsubscribe">unsubscribe</a></li></ul></li><li><a href="CommunicatorWithFiles.html">CommunicatorWithFiles</a><ul class='methods'><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_reset_file_stream">_reset_file_stream</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_sendMessage_to_file">_sendMessage_to_file</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_send_to_counted_stream">_send_to_counted_stream</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_setup_file_output">_setup_file_output</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_shutdown_files_going">_shutdown_files_going</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_start_file_shunting">_start_file_shunting</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#restore_send">restore_send</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#sendMessage">sendMessage</a></li></ul></li><li><a href="MultiPathRelayClient.html">MultiPathRelayClient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#add_relay_path">add_relay_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#await_ready">await_ready</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#closeAll">closeAll</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publish_all">publish_all</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#remove_relay_path">remove_relay_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#subscribe_all">subscribe_all</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unsubscribe">unsubscribe</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unsubscribe_all">unsubscribe_all</a></li></ul></li><li><a href="MultiRelayClient.html">MultiRelayClient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#add_relay_peer">add_relay_peer</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#closeAll">closeAll</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#commission">commission</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#decommission">decommission</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#remove_relay_peer">remove_relay_peer</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send">send</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#unsubscribe">unsubscribe</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#update_index">update_index</a></li></ul></li><li><a href="ProcWriter.html">ProcWriter</a></li><li><a href="Replier.html">Replier</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Replier.html#dequeue_messages">dequeue_messages</a></li></ul></li><li><a href="Server.html">Server</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Server.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Server.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Server.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Server.html#_load_tls_keys">_load_tls_keys</a></li><li data-type='method' style='display: none;'><a href="Server.html#onClientConnected_func">onClientConnected_func</a></li></ul></li><li><a href="ServerMulticast.html">ServerMulticast</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerMulticast.html#add_to_topic">add_to_topic</a></li><li data-type='method' style='display: none;'><a href="ServerMulticast.html#send_to_all">send_to_all</a></li></ul></li><li><a href="ServerUDP.html">ServerUDP</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerUDP.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#get_use_broadcast">get_use_broadcast</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#onListenting_func">onListenting_func</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#send_to_all">send_to_all</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#set_use_broadcast">set_use_broadcast</a></li></ul></li><li><a href="ServerWithIPC.html">ServerWithIPC</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerWithIPC.html#_init">_init</a></li></ul></li><li><a href="UDPWriter.html">UDPWriter</a></li><li><a href="UPDWriter.html">UPDWriter</a></li></ul>
+                    
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">message_endpoint_udp.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+ 
+// an intermediate endpoint implementation
+//
+const Server = require('./message_endpoint')
+const EventEmitter = require('events')
+const dgram = require('dgram')
+
+const UDP_TYPE = 'udp4'
+const NOISY = false
+
+const BIG_TIMEOUT_INTERVAL = 1000*60*30
+
+
+class NOOPWriter extends EventEmitter {
+    constructor() {
+        super()
+    }
+    write(message) {}
+}
+
+
+/**
+ * 
+ */
+class UDPWriter extends EventEmitter {
+
+    constructor(address,port,connection) {
+        super()
+        // this is a child process sending generically to the parent the process.send
+        this.readyState = (typeof process.send === "function") ? 'open' : 'closed'
+        this.con = connection
+        this.address = address
+        this.port = port
+    }
+
+    //
+    write(message) {  // passed in as a buffer
+        if ( !this.con ) return
+        this.con.send(message,0,message.length,this.port,this.address) // send back to this one
+    }
+
+}
+
+
+
+//
+/**
+ * Creates an endpoint server for connected sockets. 
+ * This differs from other servers in that it can be configured to respond or not respond to messages.
+ * Also, instances can be configured to keep client information or disgard it.
+ * The storage of the client information for such things as handling publications and subscriptions is under the 
+ * control of the client by setting `_no_resp` and `no_keeps`. When `_no_resp` the server will not respond to messages.
+ * If `no_keeps` is false, the default, then this will store connections by keys made from the port and address of the remote in a 
+ * timeout map.
+ */
+class ServerUDP extends Server {
+    //
+    constructor(conf) {
+        super(conf)
+        this.time_out_table = {}
+        this.time_out_period = conf.time_out_period ? conf.time_out_period : BIG_TIMEOUT_INTERVAL
+        this.no_op_writer = new NOOPWriter()
+        this.no_keeps = conf.no_keeps ? true : false
+        this.use_broadcast = conf.use_broadcast ? true : false
+        this.broadcast_address = conf.broadcast_address
+    }
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
+    /**
+     * 
+     * @param {boolean} bval 
+     */
+    set_use_broadcast(bval) {
+        if ( this.connection !== undefined ) {
+            this.use_broadcast = bval
+            this.connection.setBroadcast(bval)  // bval
+        } else {
+            this.use_broadcast = false  // no connectino to set
+        }
+    }
+
+    /**
+     * 
+     * @returns {boolean} - if the broadcast option is in use
+     */
+    get_use_broadcast() {
+        return this.use_broadcast
+    }
+
+
+    // send_to_all
+    //  send to all connections on the topic except the one that published
+    /**
+     * Adds to the parent implementation and uses some of its code for the default case.
+     * 
+     * @param {*} topic 
+     * @param {*} msg_obj 
+     * @param {*} ignore 
+     * @returns 
+     */
+    async send_to_all(topic,msg_obj,ignore,replier) {     // publish to all conncetions (fan out)
+        if ( this.app_can_block_and_respond ) {
+            let blocked = await this.app_publication_pre_fan_response(topic,msg_obj,ignore)
+            if ( blocked ) return
+        }
+        let tset = this.all_topics[topic]   // topic map -- all subscription clients
+        if ( tset ) {
+            // USE BROADCAST
+            if ( this.use_broadcast &amp;&amp; this.connection ) {
+                let str_msg = replier.encode_message(msg_obj)           // BROADCAST ADDRESS
+                this.connection.send(str_msg,0,str_msg.length,this.port,this.broadcast_address)
+            } else {
+                // USE INDIVIDUAL KEPT CONNECTIONS
+                for ( let client_name in tset ) {     // all clients
+                    let relayer = tset[client_name] 
+                    this.send_to_one(relayer,msg_obj)
+                    if ( relayer &amp;&amp; (relayer.writer !== ignore) ) {
+                        this.send_to_one(relayer,msg_obj)
+                    }
+                }
+                //
+            }
+            if ( this.app_handles_subscriptions ) {     // (override) this application acts as an endpoint to the topic
+                this.app_subscription_handler(topic,msg_obj)
+            }
+        }
+    }
+
+
+
+    /**
+     * 
+     * @param {object} conf 
+     */
+    _init_members(conf) {
+        super._init_members(conf)
+        this.udp_type = conf ? conf.udp4or6 || UDP_TYPE : UDP_TYPE
+        this.time_out_interval = setInterval(() => {
+            let t = Date.now()
+            let removals = []
+            for ( let [client_name,access_time] of Object.entries(this.time_out_table) ) {
+                if ( t - access_time > this.time_out_period*3 ) {
+                    this.remove_connection(client_name)
+                    removals.push(client_name)
+                }
+            }
+            for ( let cname of removals ) {
+                this.remove_connection(cname)
+            }
+        },this.time_out_period)
+    }
+
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+    /**
+     * 
+     * @param {object} sock - the expected UDP socket returned by node.js dgram.createSocket
+     */
+    onListenting_func(sock) {
+        // // 
+        //
+        sock.on('message', async (data, rinfo) => {
+            //
+            //
+            try {
+                let dstr = data.toString()
+                let mobj = JSON.parse(dstr)
+                //
+                if ( mobj._no_resp ) {   // keep one permanent client that never receives a response
+                    let no_client_name = "NO:RESPONSE"
+                    let prev_writer = this.has_connection(no_client_name)  // returns a wrapper of the UDPWriter 
+                    if ( prev_writer === false ) {
+                        this.add_connection(no_client_name,this.no_op_writer)
+                    }
+                    await this.add_object_and_react(no_client_name,mobj)   // this is usually supposed to be a response to a previous send
+                } else {
+                    let client_name = `${rinfo.address}:${rinfo.port}`;
+                    if ( NOISY ) console.log(`new client connected: ${client_name}`);
+                    //
+                    let prev_writer = this.has_connection(client_name)  // returns a wrapper of the UDPWriter 
+                    if ( prev_writer === false ) {
+                        let a_writer = new UDPWriter(rinfo.address,rinfo.port,sock);
+                        this.add_connection(client_name,a_writer)
+                    }
+                    //
+                    await this.add_object_and_react(client_name,mobj)   // this is usually supposed to be a response to a previous send
+                    if ( this.no_keeps &amp;&amp; (mobj._ps_op &amp;&amp; ( mobj._ps_op == 'sub' || mobj._ps_op == 'pub' )) ) {
+                        this.time_out_table[client_name] = Date.now()
+                    } else if ( !this.no_keeps ) {  // anything not having to do with publication and we are keeping connections
+                        this.time_out_table[client_name] = Date.now()
+                    } else {
+                        this.remove_connection(client_name)
+                    }
+                }
+            } catch (e) {}
+        });
+        //
+        sock.on('close', () => {
+            //sock.disconnect()
+        });
+        //
+        sock.on('error', (err) => {
+            console.error(`Connection ${client_name} error: ${err.message}`);
+        });
+        //
+    }
+
+    // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+
+    /**
+     * 
+     */
+    _create_connection() {
+        //
+        this.connection = dgram.createSocket(this.udp_type)
+
+        this.connection.on('listening',() => {
+            const address =  this.connection.address();
+            console.log(`server listening ${address.address}:${address.port}`);
+            this.onListenting_func(this.connection)
+            //
+            this.set_use_broadcast(this.use_broadcast)  // if it was already set by config
+            // 
+            this.emit('server-ready')
+        })
+
+        if ( this.address !== undefined ) {
+            this.connection.bind(this.port,this.address)
+        } else {
+            this.connection.bind(this.port)   // listen on all interface
+        }
+        //
+    }
+
+}
+
+//
+module.exports = ServerUDP;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Sat Jul 11 2026 00:30:10 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>
