@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>MessageRelayManager - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Overview</a></h2><h2><a href="https://github.com/copious-world/message-relay-services" target="_blank" class="menu-item" id="repository" >Github repo</a></h2><h2><a href="https://www.npmjs.com/package/message-relay-services" target="_blank" class="menu-item" id="package" >Npm package</a></h2><h3>Classes</h3>
+                        <ul id="classes-ul-overflow" class="menu-contained-nav" ><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Client.html#_attempt_reconnect">_attempt_reconnect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_configure_reconnect">_configure_reconnect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connect">_connect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connect">_connect</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connection_handler">_connection_handler</a></li><li data-type='method' style='display: none;'><a href="Client.html#_connection_handler">_connection_handler</a></li><li data-type='method' style='display: none;'><a href="Client.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Client.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Client.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Client.html#_load_tls_keys">_load_tls_keys</a></li><li data-type='method' style='display: none;'><a href="Client.html#_setup_connection_handlers">_setup_connection_handlers</a></li><li data-type='method' style='display: none;'><a href="Client.html#_setup_connection_handlers">_setup_connection_handlers</a></li><li data-type='method' style='display: none;'><a href="Client.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="Client.html#unsubscribe">unsubscribe</a></li></ul></li><li></li><li></li><li><a href="Communicator.html">Communicator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Communicator.html#_handle_unsolicited">_handle_unsolicited</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#_message_and_response">_message_and_response</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_connection">add_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_connection">add_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_data_and_react">add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_data_and_react">add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_object_and_react">add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_object_and_react">add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#add_to_topic">add_to_topic</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_message_handler">app_message_handler</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_post_start_subscription">app_post_start_subscription</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publication_pre_fan_response">app_publication_pre_fan_response</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publish">app_publish</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_publish_on_path">app_publish_on_path</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#app_subscription_handler">app_subscription_handler</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#client_add_data_and_react">client_add_data_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#client_add_object_and_react">client_add_object_and_react</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#close">close</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#has_connection">has_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_connection">remove_connection</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_from_all_topics">remove_from_all_topics</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#remove_from_topics">remove_from_topics</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#sendMessage">sendMessage</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_all">send_to_all</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_one">send_to_one</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#send_to_subset">send_to_subset</a></li><li data-type='method' style='display: none;'><a href="Communicator.html#unkown_topic">unkown_topic</a></li></ul></li><li></li><li><a href="CommunicatorAPI.html">CommunicatorAPI</a><ul class='methods'><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#mod_on_path">mod_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#publish_path_default">publish_path_default</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send">send</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#subscribe_path_default">subscribe_path_default</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="CommunicatorAPI.html#unsubscribe">unsubscribe</a></li></ul></li><li><a href="CommunicatorWithFiles.html">CommunicatorWithFiles</a><ul class='methods'><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_reset_file_stream">_reset_file_stream</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_sendMessage_to_file">_sendMessage_to_file</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_send_to_counted_stream">_send_to_counted_stream</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_setup_file_output">_setup_file_output</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_shutdown_files_going">_shutdown_files_going</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#_start_file_shunting">_start_file_shunting</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#restore_send">restore_send</a></li><li data-type='method' style='display: none;'><a href="CommunicatorWithFiles.html#sendMessage">sendMessage</a></li></ul></li><li><a href="MessageRelayContainer.html">MessageRelayContainer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MessageRelayContainer.html#app_message_handler">app_message_handler</a></li></ul></li><li><a href="MessageRelayManager.html">MessageRelayManager</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MessageRelayManager.html#add_waiting_connection">add_waiting_connection</a></li><li data-type='method' style='display: none;'><a href="MessageRelayManager.html#app_message_handler">app_message_handler</a></li></ul></li><li><a href="MultiPathRelayClient.html">MultiPathRelayClient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#add_relay_path">add_relay_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#await_ready">await_ready</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#closeAll">closeAll</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#publish_all">publish_all</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#remove_relay_path">remove_relay_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#subscribe_all">subscribe_all</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unsubscribe">unsubscribe</a></li><li data-type='method' style='display: none;'><a href="MultiPathRelayClient.html#unsubscribe_all">unsubscribe_all</a></li></ul></li><li><a href="MultiRelayClient.html">MultiRelayClient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#add_relay_peer">add_relay_peer</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#closeAll">closeAll</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#commission">commission</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#decommission">decommission</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#del_on_path">del_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#get_on_path">get_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#publication_on_path">publication_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#publish">publish</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#remove_relay_peer">remove_relay_peer</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send">send</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send_on_path">send_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#send_op_on_path">send_op_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#set_on_path">set_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#subscribe">subscribe</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#unpublish_on_path">unpublish_on_path</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#unsubscribe">unsubscribe</a></li><li data-type='method' style='display: none;'><a href="MultiRelayClient.html#update_index">update_index</a></li></ul></li><li><a href="ProcWriter.html">ProcWriter</a></li><li><a href="Replier.html">Replier</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Replier.html#dequeue_messages">dequeue_messages</a></li></ul></li><li><a href="Server.html">Server</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Server.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="Server.html#_init">_init</a></li><li data-type='method' style='display: none;'><a href="Server.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="Server.html#_load_tls_keys">_load_tls_keys</a></li><li data-type='method' style='display: none;'><a href="Server.html#onClientConnected_func">onClientConnected_func</a></li></ul></li><li><a href="ServerMulticast.html">ServerMulticast</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerMulticast.html#add_to_topic">add_to_topic</a></li><li data-type='method' style='display: none;'><a href="ServerMulticast.html#send_to_all">send_to_all</a></li></ul></li><li><a href="ServerUDP.html">ServerUDP</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerUDP.html#_create_connection">_create_connection</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#_init_members">_init_members</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#get_use_broadcast">get_use_broadcast</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#onListenting_func">onListenting_func</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#send_to_all">send_to_all</a></li><li data-type='method' style='display: none;'><a href="ServerUDP.html#set_use_broadcast">set_use_broadcast</a></li></ul></li><li><a href="ServerWithIPC.html">ServerWithIPC</a><ul class='methods'><li data-type='method' style='display: none;'><a href="ServerWithIPC.html#_init">_init</a></li></ul></li><li><a href="UDPWriter.html">UDPWriter</a></li><li><a href="UPDWriter.html">UPDWriter</a></li></ul>
+                    
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">MessageRelayManager</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        
+            MessageRelayManager
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>This is a manager of clients. It sets up a UDP server waiting for a message that can tell the
+processes if there is a server to which the client may connect. Clients that have been entered into
+the table of waiting connections will be accessed in order to call the the methods that finally connect
+to the newely introduced server and setup up the connection management in the object that faces the application code.</p>
+<p>Updating code to use this class requires adding a few lines before the call to the relay client.
+The lines will be to add coniguration parameters.</p>
+<p>For example:</p>
+<pre class="prettyprint source"><code> conf._connection_manager = new MessageRelayManager(rm_conf)
+ conf._connect_label = &quot;ISEEKSERVICE&quot;
+
+ let new_connection = new MessageRelay(conf)
+</code></pre></div>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="MessageRelayManager"><span class="type-signature"></span>new MessageRelayManager<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client-producer_cmanager.js.html">client-producer/cmanager.js</a>, <a href="client-producer_cmanager.js.html#line32">line 32</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="add_waiting_connection"><span class="type-signature"></span>add_waiting_connection<span class="signature">(connect_label, connection, conf, connection_op)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>The remote prompting the connection must know the label for the client that will connect to a server.
+<code>add_waiting_connection</code> is called by the message relay client <code>_create_connection</code>.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client-producer_cmanager.js.html">client-producer/cmanager.js</a>, <a href="client-producer_cmanager.js.html#line48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>connect_label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>connection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a message relay class object</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>conf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the configuration of the message realy being passe to the connection op</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>connection_op</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the final steps require for establishing a connection</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="app_message_handler"><span class="type-signature"></span>app_message_handler<span class="signature">(msg_obj)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>The application implementation of app_message_handler</p>
+<p>This version (MessageRelayManager::UDPEndpoint) of <code>app_message_handler</code> provides just the handler for
+<code>set_on_path</code>. The program that uses this creates the MessageRelay client as usual, but configures it to wait
+on this server to call back to it when the server makes itself known and available for connection.</p>
+<p>The call to the handler in the <code>_waiting_connections</code> table is taken of by the MessageRelay class.  So, most
+application should not be concerned with writing a version of it.</p>
+<p>In order to make a message relay client use this class, these fields have to be set in its configuration.</p>
+<p><code>conf._connection_manager &amp;&amp; conf._connect_label</code></p>
+<p>Here, <code>_connection_manager</code> is an instance of this class.
+The <code>_connect_label</code> configuration parameter is a public identifier (where public might be
+behind a firewall but may be external depending on the application). The <code>_connect_label</code> serves to
+identify the client that waits to connect to a particular server. Both the server and the client make this
+identifier known to utilities that signal the instances of this class via its UDP server. And, this method <code>app_message_handler</code>
+responds to <code>set</code> messages from the utility by taking the following action:</p>
+<blockquote>
+<p>The connection (communicator) class instance indicated by the label is accessed via the map <code>_waiting_connections</code> and then
+the its connection operation is performed.</p>
+</blockquote>
+<p>The result of performing the connection operation should be that the message relay client will be connected to the
+the server identified in the <code>set</code> message from the utilities previously mentioned.</p>
+<p>Configuration parameters for connection appear in the message. If tls information is provided, it is deleted and local defaults
+associated with the configuration of the message_relay_class are used in its place.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client-producer_cmanager.js.html">client-producer/cmanager.js</a>, <a href="client-producer_cmanager.js.html#line86">line 86</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>msg_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Jul 16 2026 23:04:25 GMT-0700 (Pacific Daylight Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>
