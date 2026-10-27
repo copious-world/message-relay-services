@@ -109,4 +109,78 @@ class JSONMessageQueue {
 
 
 
+
+// For pub/sub, this is an endpoint server. So, there is no forwarding, as with a relayer. Any path semantics ends here.
+// If this were an MQTT server, this would be enough to be a server (except for omitted parts of the standard)
+// When a sub message comes in, it means that a client somewhere upstream sent a request to receive publication.
+// When a publish message comes in, it mean that a client somewhere upstream sent a request for the message to go out 
+// to all the subscribers to the topic.
+
+/**
+ * 
+ */
+class Replier extends JSONMessageQueue {
+
+    //
+    constructor(pars) {
+        super(false,false)
+        this.writer = pars.writer
+        this.server = pars.server
+        this.client_name = pars.client_name
+    }
+
+    //
+    /**
+     * Takes objects off the message queue and then uses their required messages fields to select
+     * the operation that will be performed. 
+     * Those messages with `_ps_op` values will work a pub/sub operations.
+     * Otherwise, the server `app_message_handler` will be invoked for application specific operations.
+     * All types of message will call upon the writer to send responses back to the server...
+     */
+    async dequeue_messages() {
+        if ( this.message_queue.length ) {
+            let msg_obj = this.dequeue()
+            if (  msg_obj ) {  // pub/sub message category
+                if ( (typeof msg_obj._ps_op !== undefined) && msg_obj._ps_op ) {
+                    let topic = msg_obj.topic
+                    let state = "OK"
+                    let response_id = msg_obj._response_id      // send back what came in (if it is keep track of replies)
+                    // _ps_op a pub/sub operation
+                    switch ( msg_obj._ps_op ) {
+                        case 'sub' : {      // this client will receive 
+                            this.server.add_to_topic(topic,this.client_name,this)  // this.writer... keep track 
+                            break;
+                        }
+                        case 'pub' : {  // came in on this client and will fan out to others
+                            let ignore = this.writer
+                            delete msg_obj._response_id
+                            await this.server.send_to_all(topic,msg_obj,ignore,this)
+                            break;
+                        }
+                        case 'unsub' : {        // remove from possible subscriptions
+                            this.server.remove_from_topics(topic,this.client_name)
+                            break;
+                        }
+                        default: {  // not in pub/sub vocab
+                            state = "ERR"
+                        }
+                    }
+                    let response = { "_response_id" : response_id, "state" : state }
+                    let return_msg = this.encode_message(response)
+                    this.writer.write(return_msg)     // actual reply
+                } else {
+                    let response_id = msg_obj._response_id
+                    let response = await this.server.app_message_handler(msg_obj)
+                    response._response_id = response_id
+                    let return_msg = this.encode_message(response)
+                    this.writer.write(return_msg)
+                }
+            }
+        }
+    }
+}
+
+
+
 module.exports = JSONMessageQueue
+module.exports.Replier = Replier
