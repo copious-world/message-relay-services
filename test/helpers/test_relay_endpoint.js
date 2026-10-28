@@ -29,6 +29,7 @@ class EndpointForTest extends ServeMessageEndpoint {
         let op = msg_obj._tx_op
         let result = "OK"
         //
+console.log("app_message_handler",msg_obj)
         switch ( op ) {
             case 'G' : {        // get user information
                 let stat = "OK"

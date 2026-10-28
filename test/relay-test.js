@@ -17,6 +17,9 @@ const {
 
 //
 async function testf() {
+    console.log(typeof MessageRelayer)
+    console.log(typeof MessageRelayServer)
+
     //test('starter relay talks to more than one endpoint', t => {
     let startup_list = []
 
@@ -85,10 +88,6 @@ async function testf() {
             resp = await starter.forward_message_promise({ "message" : "this is the second message"}, "test-endpoint-2")
             console.log(resp)    
         },2000)
-
-
-
-
 
     } else {
         //

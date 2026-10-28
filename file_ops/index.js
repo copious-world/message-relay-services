@@ -29,6 +29,15 @@ class DefaultFileOps {
         }
     }
 
+    readFileSync(fname) {
+        try {
+            let value = fs.readFileSync(fname)
+            return value
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
 
     createWriteStream(fpath) {
         return fs.createWriteStream(fpath)
